@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<Project version="2G - 1.7.7" name="tneo_cortex_m_coocox">
-  <Target name="tneo_cortex_m_coocox" isCurrent="1">
+<Project version="2G - 1.7.7" name="kernel_cortex_m_coocox">
+  <Target name="kernel_cortex_m_coocox" isCurrent="1">
     <Device manufacturerId="1" manufacturerName="ARM" chipId="4" chipName="M4" boardId="" boardName=""/>
     <BuildOption>
       <Compile>
@@ -34,12 +34,12 @@
           <Memory name="IROM2" type="ReadOnly" size="" startValue=""/>
           <Memory name="IRAM2" type="ReadWrite" size="" startValue=""/>
         </MemoryAreas>
-        <LocateLinkFile path="c:/coocox/coide/configuration/programdata/tneo_cortex_m_coocox/arm-gcc-link.ld" type="0"/>
+        <LocateLinkFile path="c:/coocox/coide/configuration/programdata/kernel_cortex_m_coocox/arm-gcc-link.ld" type="0"/>
       </Link>
       <Output>
         <Option name="OutputFileType" value="1"/>
         <Option name="Path" value="./"/>
-        <Option name="Name" value="tneo_cortex_m_coocox"/>
+        <Option name="Name" value="kernel_cortex_m_coocox"/>
         <Option name="HEX" value="1"/>
         <Option name="BIN" value="1"/>
       </Output>
@@ -71,20 +71,20 @@
   </Target>
   <Components path="./"/>
   <Files>
-    <File name="core/tn_timer_dyn.c" path="../../../src/core/tn_timer_dyn.c" type="1"/>
-    <File name="core/tn_eventgrp.c" path="../../../src/core/tn_eventgrp.c" type="1"/>
-    <File name="core/tn_timer_static.c" path="../../../src/core/tn_timer_static.c" type="1"/>
-    <File name="arch/tn_arch_cortex_m_c.c" path="../../../src/arch/cortex_m/tn_arch_cortex_m_c.c" type="1"/>
-    <File name="core/tn_list.c" path="../../../src/core/tn_list.c" type="1"/>
+    <File name="core/kernel_timer_dyn.c" path="../../../src/core/kernel_timer_dyn.c" type="1"/>
+    <File name="core/kernel_eventgrp.c" path="../../../src/core/kernel_eventgrp.c" type="1"/>
+    <File name="core/kernel_timer_static.c" path="../../../src/core/kernel_timer_static.c" type="1"/>
+    <File name="arch/kernel_arch_cortex_m_c.c" path="../../../src/arch/cortex_m/kernel_arch_cortex_m_c.c" type="1"/>
+    <File name="core/kernel_list.c" path="../../../src/core/kernel_list.c" type="1"/>
     <File name="arch" path="" type="2"/>
-    <File name="core/tn_mutex.c" path="../../../src/core/tn_mutex.c" type="1"/>
-    <File name="core/tn_timer.c" path="../../../src/core/tn_timer.c" type="1"/>
-    <File name="core/tn_sys.c" path="../../../src/core/tn_sys.c" type="1"/>
-    <File name="core/tn_dqueue.c" path="../../../src/core/tn_dqueue.c" type="1"/>
-    <File name="core/tn_fmem.c" path="../../../src/core/tn_fmem.c" type="1"/>
-    <File name="core/tn_tasks.c" path="../../../src/core/tn_tasks.c" type="1"/>
-    <File name="core/tn_sem.c" path="../../../src/core/tn_sem.c" type="1"/>
-    <File name="arch/tn_arch_cortex_m.S" path="../../../src/arch/cortex_m/tn_arch_cortex_m.S" type="1"/>
+    <File name="core/kernel_mutex.c" path="../../../src/core/kernel_mutex.c" type="1"/>
+    <File name="core/kernel_timer.c" path="../../../src/core/kernel_timer.c" type="1"/>
+    <File name="core/kernel_sys.c" path="../../../src/core/kernel_sys.c" type="1"/>
+    <File name="core/kernel_dqueue.c" path="../../../src/core/kernel_dqueue.c" type="1"/>
+    <File name="core/kernel_fmem.c" path="../../../src/core/kernel_fmem.c" type="1"/>
+    <File name="core/kernel_tasks.c" path="../../../src/core/kernel_tasks.c" type="1"/>
+    <File name="core/kernel_sem.c" path="../../../src/core/kernel_sem.c" type="1"/>
+    <File name="arch/kernel_arch_cortex_m.S" path="../../../src/arch/cortex_m/kernel_arch_cortex_m.S" type="1"/>
     <File name="core" path="" type="2"/>
   </Files>
 </Project>

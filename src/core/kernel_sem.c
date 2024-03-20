@@ -1,18 +1,18 @@
 /*******************************************************************************
  *
- * TNeo: real-time kernel initially based on TNKernel
+ * KERNEL: real-time kernel initially based on KERNELKernel
  *
- *    TNKernel:                  copyright 2004, 2013 Yuri Tiomkin.
+ *    KERNELKernel:                  copyright 2004, 2013 Yuri Tiomkin.
  *    PIC32-specific routines:   copyright 2013, 2014 Anders Montonen.
- *    TNeo:                      copyright 2014       Dmitry Frank.
+ *    KERNEL:                      copyright 2014       Dmitry Frank.
  *
- *    TNeo was born as a thorough review and re-implementation of
- *    TNKernel. The new kernel has well-formed code, inherited bugs are fixed
+ *    KERNEL was born as a thorough review and re-implementation of
+ *    KERNELKernel. The new kernel has well-formed code, inherited bugs are fixed
  *    as well as new features being added, and it is tested carefully with
  *    unit-tests.
  *
- *    API is changed somewhat, so it's not 100% compatible with TNKernel,
- *    hence the new name: TNeo.
+ *    API is changed somewhat, so it's not 100% compatible with KERNELKernel,
+ *    hence the new name: KERNEL.
  *
  *    Permission to use, copy, modify, and distribute this software in source
  *    and binary forms and its documentation for any purpose and without fee
@@ -22,7 +22,7 @@
  *
  *    THIS SOFTWARE IS PROVIDED BY THE DMITRY FRANK AND CONTRIBUTORS "AS IS"
  *    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FIKERNELESS FOR A PARTICULAR
  *    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL DMITRY FRANK OR CONTRIBUTORS BE
  *    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  *    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
@@ -39,20 +39,20 @@
  *    INCLUDED FILES
  ******************************************************************************/
 
-//-- common tnkernel headers
-#include "tn_common.h"
-#include "tn_sys.h"
+//-- common kernelkernel headers
+#include "kernel_common.h"
+#include "kernel_sys.h"
 
-//-- internal tnkernel headers
-#include "_tn_tasks.h"
-#include "_tn_list.h"
+//-- internal kernelkernel headers
+#include "_kernel_tasks.h"
+#include "_kernel_list.h"
 
 
 //-- header of current module
-#include "_tn_sem.h"
+#include "_kernel_sem.h"
 
 //-- header of other needed modules
-#include "tn_tasks.h"
+#include "kernel_tasks.h"
 
 
 
@@ -62,17 +62,17 @@
  ******************************************************************************/
 
 //-- Additional param checking {{{
-#if TN_CHECK_PARAM
-_TN_STATIC_INLINE enum TN_RCode _check_param_generic(
-      const struct TN_Sem *sem
+#if KERNEL_CHECK_PARAM
+_KERNEL_STATIC_INLINE enum KERNEL_RCode _check_param_generic(
+      const struct KERNEL_Sem *sem
       )
 {
-   enum TN_RCode rc = TN_RC_OK;
+   enum KERNEL_RCode rc = KERNEL_RC_OK;
 
-   if (sem == TN_NULL){
-      rc = TN_RC_WPARAM;
-   } else if (!_tn_sem_is_valid(sem)){
-      rc = TN_RC_INVALID_OBJ;
+   if (sem == KERNEL_NULL){
+      rc = KERNEL_RC_WPARAM;
+   } else if (!_kernel_sem_is_valid(sem)){
+      rc = KERNEL_RC_INVALID_OBJ;
    }
 
    return rc;
@@ -81,32 +81,32 @@ _TN_STATIC_INLINE enum TN_RCode _check_param_generic(
 /**
  * Additional param checking when creating semaphore
  */
-_TN_STATIC_INLINE enum TN_RCode _check_param_create(
-      const struct TN_Sem *sem,
+_KERNEL_STATIC_INLINE enum KERNEL_RCode _check_param_create(
+      const struct KERNEL_Sem *sem,
       int start_count,
       int max_count
       )
 {
-   enum TN_RCode rc = TN_RC_OK;
+   enum KERNEL_RCode rc = KERNEL_RC_OK;
 
-   if (sem == TN_NULL){
-      rc = TN_RC_WPARAM;
+   if (sem == KERNEL_NULL){
+      rc = KERNEL_RC_WPARAM;
    } else if (0
-         || _tn_sem_is_valid(sem)
+         || _kernel_sem_is_valid(sem)
          || max_count <= 0
          || start_count < 0
          || start_count > max_count
          )
    {
-      rc = TN_RC_WPARAM;
+      rc = KERNEL_RC_WPARAM;
    }
 
    return rc;
 }
 
 #else
-#  define _check_param_generic(sem)                            (TN_RC_OK)
-#  define _check_param_create(sem, start_count, max_count)     (TN_RC_OK)
+#  define _check_param_generic(sem)                            (KERNEL_RC_OK)
+#  define _check_param_create(sem, start_count, max_count)     (KERNEL_RC_OK)
 #endif
 // }}}
 
@@ -116,49 +116,49 @@ _TN_STATIC_INLINE enum TN_RCode _check_param_create(
  *
  * @param sem        semaphore to perform job on
  * @param p_worker   pointer to actual worker function
- * @param timeout    see `#TN_TickCnt`
+ * @param timeout    see `#KERNEL_TickCnt`
  */
-_TN_STATIC_INLINE enum TN_RCode _sem_job_perform(
-      struct TN_Sem *sem,
-      enum TN_RCode (p_worker)(struct TN_Sem *sem),
-      TN_TickCnt timeout
+_KERNEL_STATIC_INLINE enum KERNEL_RCode _sem_job_perform(
+      struct KERNEL_Sem *sem,
+      enum KERNEL_RCode (p_worker)(struct KERNEL_Sem *sem),
+      KERNEL_TickCnt timeout
       )
 {
-   enum TN_RCode rc = _check_param_generic(sem);
-   TN_BOOL waited_for_sem = TN_FALSE;
+   enum KERNEL_RCode rc = _check_param_generic(sem);
+   KERNEL_BOOL waited_for_sem = KERNEL_FALSE;
 
-   if (rc != TN_RC_OK){
+   if (rc != KERNEL_RC_OK){
       //-- just return rc as it is
-   } else if (!tn_is_task_context()){
-      rc = TN_RC_WCONTEXT;
+   } else if (!kernel_is_task_context()){
+      rc = KERNEL_RC_WCONTEXT;
    } else {
-      TN_INTSAVE_DATA;
+      KERNEL_INTSAVE_DATA;
 
-      TN_INT_DIS_SAVE();      //-- disable interrupts
+      KERNEL_INT_DIS_SAVE();      //-- disable interrupts
       rc = p_worker(sem);     //-- call actual worker function
 
       //-- if we should wait, put current task to wait
-      if (rc == TN_RC_TIMEOUT && timeout != 0){
-         _tn_task_curr_to_wait_action(
-               &(sem->wait_queue), TN_WAIT_REASON_SEM, timeout
+      if (rc == KERNEL_RC_TIMEOUT && timeout != 0){
+         _kernel_task_curr_to_wait_action(
+               &(sem->wait_queue), KERNEL_WAIT_REASON_SEM, timeout
                );
 
          //-- rc will be set later thanks to waited_for_sem
-         waited_for_sem = TN_TRUE;
+         waited_for_sem = KERNEL_TRUE;
       }
 
-#if TN_DEBUG
-      //-- if we're going to wait, _tn_need_context_switch() must return TN_TRUE
-      if (!_tn_need_context_switch() && waited_for_sem){
-         _TN_FATAL_ERROR("");
+#if KERNEL_DEBUG
+      //-- if we're going to wait, _kernel_need_context_switch() must return KERNEL_TRUE
+      if (!_kernel_need_context_switch() && waited_for_sem){
+         _KERNEL_FATAL_ERROR("");
       }
 #endif
 
-      TN_INT_RESTORE();       //-- restore previous interrupts state
-      _tn_context_switch_pend_if_needed();
+      KERNEL_INT_RESTORE();       //-- restore previous interrupts state
+      _kernel_context_switch_pend_if_needed();
       if (waited_for_sem){
          //-- get wait result
-         rc = _tn_curr_run_task->task_wait_rc;
+         rc = _kernel_curr_run_task->task_wait_rc;
       }
 
    }
@@ -171,37 +171,37 @@ _TN_STATIC_INLINE enum TN_RCode _sem_job_perform(
  * @param sem        semaphore to perform job on
  * @param p_worker   pointer to actual worker function
  */
-_TN_STATIC_INLINE enum TN_RCode _sem_job_iperform(
-      struct TN_Sem *sem,
-      enum TN_RCode (p_worker)(struct TN_Sem *sem)
+_KERNEL_STATIC_INLINE enum KERNEL_RCode _sem_job_iperform(
+      struct KERNEL_Sem *sem,
+      enum KERNEL_RCode (p_worker)(struct KERNEL_Sem *sem)
       )
 {
-   enum TN_RCode rc = _check_param_generic(sem);
+   enum KERNEL_RCode rc = _check_param_generic(sem);
 
-   //-- perform additional params checking (if enabled by TN_CHECK_PARAM)
-   if (rc != TN_RC_OK){
+   //-- perform additional params checking (if enabled by KERNEL_CHECK_PARAM)
+   if (rc != KERNEL_RC_OK){
       //-- just return rc as it is
-   } else if (!tn_is_isr_context()){
-      rc = TN_RC_WCONTEXT;
+   } else if (!kernel_is_isr_context()){
+      rc = KERNEL_RC_WCONTEXT;
    } else {
-      TN_INTSAVE_DATA_INT;
+      KERNEL_INTSAVE_DATA_INT;
 
-      TN_INT_IDIS_SAVE();     //-- disable interrupts
+      KERNEL_INT_IDIS_SAVE();     //-- disable interrupts
       rc = p_worker(sem);     //-- call actual worker function
-      TN_INT_IRESTORE();      //-- restore previous interrupts state
-      _TN_CONTEXT_SWITCH_IPEND_IF_NEEDED();
+      KERNEL_INT_IRESTORE();      //-- restore previous interrupts state
+      _KERNEL_CONTEXT_SWITCH_IPEND_IF_NEEDED();
    }
    return rc;
 }
 
-_TN_STATIC_INLINE enum TN_RCode _sem_signal(struct TN_Sem *sem)
+_KERNEL_STATIC_INLINE enum KERNEL_RCode _sem_signal(struct KERNEL_Sem *sem)
 {
-   enum TN_RCode rc = TN_RC_OK;
+   enum KERNEL_RCode rc = KERNEL_RC_OK;
 
    //-- wake up first (if any) task from the semaphore wait queue
-   if (  !_tn_task_first_wait_complete(
-            &sem->wait_queue, TN_RC_OK,
-            TN_NULL, TN_NULL, TN_NULL
+   if (  !_kernel_task_first_wait_complete(
+            &sem->wait_queue, KERNEL_RC_OK,
+            KERNEL_NULL, KERNEL_NULL, KERNEL_NULL
             )
       )
    {
@@ -210,24 +210,24 @@ _TN_STATIC_INLINE enum TN_RCode _sem_signal(struct TN_Sem *sem)
       if (sem->count < sem->max_count){
          sem->count++;
       } else {
-         rc = TN_RC_OVERFLOW;
+         rc = KERNEL_RC_OVERFLOW;
       }
    }
 
    return rc;
 }
 
-_TN_STATIC_INLINE enum TN_RCode _sem_wait(struct TN_Sem *sem)
+_KERNEL_STATIC_INLINE enum KERNEL_RCode _sem_wait(struct KERNEL_Sem *sem)
 {
-   enum TN_RCode rc = TN_RC_OK;
+   enum KERNEL_RCode rc = KERNEL_RC_OK;
 
    //-- decrement semaphore count if possible.
-   //   If not, return TN_RC_TIMEOUT
+   //   If not, return KERNEL_RC_TIMEOUT
    //   (it is handled in _sem_job_perform() / _sem_job_iperform())
    if (sem->count > 0){
       sem->count--;
    } else {
-      rc = TN_RC_TIMEOUT;
+      rc = KERNEL_RC_TIMEOUT;
    }
 
    return rc;
@@ -242,97 +242,97 @@ _TN_STATIC_INLINE enum TN_RCode _sem_wait(struct TN_Sem *sem)
  ******************************************************************************/
 
 /*
- * See comments in the header file (tn_sem.h)
+ * See comments in the header file (kernel_sem.h)
  */
-enum TN_RCode tn_sem_create(
-      struct TN_Sem *sem,
+enum KERNEL_RCode kernel_sem_create(
+      struct KERNEL_Sem *sem,
       int start_count,
       int max_count
       )
 {
-   //-- perform additional params checking (if enabled by TN_CHECK_PARAM)
-   enum TN_RCode rc = _check_param_create(sem, start_count, max_count);
+   //-- perform additional params checking (if enabled by KERNEL_CHECK_PARAM)
+   enum KERNEL_RCode rc = _check_param_create(sem, start_count, max_count);
 
-   if (rc != TN_RC_OK){
+   if (rc != KERNEL_RC_OK){
       //-- just return rc as it is
    } else {
 
-      _tn_list_reset(&(sem->wait_queue));
+      _kernel_list_reset(&(sem->wait_queue));
 
       sem->count     = start_count;
       sem->max_count = max_count;
-      sem->id_sem    = TN_ID_SEMAPHORE;
+      sem->id_sem    = KERNEL_ID_SEMAPHORE;
 
    }
    return rc;
 }
 
 /*
- * See comments in the header file (tn_sem.h)
+ * See comments in the header file (kernel_sem.h)
  */
-enum TN_RCode tn_sem_delete(struct TN_Sem * sem)
+enum KERNEL_RCode kernel_sem_delete(struct KERNEL_Sem * sem)
 {
-   //-- perform additional params checking (if enabled by TN_CHECK_PARAM)
-   enum TN_RCode rc = _check_param_generic(sem);
+   //-- perform additional params checking (if enabled by KERNEL_CHECK_PARAM)
+   enum KERNEL_RCode rc = _check_param_generic(sem);
 
-   if (rc != TN_RC_OK){
+   if (rc != KERNEL_RC_OK){
       //-- just return rc as it is
-   } else if (!tn_is_task_context()){
-      rc = TN_RC_WCONTEXT;
+   } else if (!kernel_is_task_context()){
+      rc = KERNEL_RC_WCONTEXT;
    } else {
-      TN_INTSAVE_DATA;
+      KERNEL_INTSAVE_DATA;
 
-      TN_INT_DIS_SAVE();
+      KERNEL_INT_DIS_SAVE();
 
-      //-- Remove all tasks from wait queue, returning the TN_RC_DELETED code.
-      _tn_wait_queue_notify_deleted(&(sem->wait_queue));
+      //-- Remove all tasks from wait queue, returning the KERNEL_RC_DELETED code.
+      _kernel_wait_queue_notify_deleted(&(sem->wait_queue));
 
-      sem->id_sem = TN_ID_NONE;        //-- Semaphore does not exist now
-      TN_INT_RESTORE();
+      sem->id_sem = KERNEL_ID_NONE;        //-- Semaphore does not exist now
+      KERNEL_INT_RESTORE();
 
-      //-- we might need to switch context if _tn_wait_queue_notify_deleted()
+      //-- we might need to switch context if _kernel_wait_queue_notify_deleted()
       //   has woken up some high-priority task
-      _tn_context_switch_pend_if_needed();
+      _kernel_context_switch_pend_if_needed();
    }
    return rc;
 }
 
 /*
- * See comments in the header file (tn_sem.h)
+ * See comments in the header file (kernel_sem.h)
  */
-enum TN_RCode tn_sem_signal(struct TN_Sem *sem)
+enum KERNEL_RCode kernel_sem_signal(struct KERNEL_Sem *sem)
 {
    return _sem_job_perform(sem, _sem_signal, 0);
 }
 
 /*
- * See comments in the header file (tn_sem.h)
+ * See comments in the header file (kernel_sem.h)
  */
-enum TN_RCode tn_sem_isignal(struct TN_Sem *sem)
+enum KERNEL_RCode kernel_sem_isignal(struct KERNEL_Sem *sem)
 {
    return _sem_job_iperform(sem, _sem_signal);
 }
 
 /*
- * See comments in the header file (tn_sem.h)
+ * See comments in the header file (kernel_sem.h)
  */
-enum TN_RCode tn_sem_wait(struct TN_Sem *sem, TN_TickCnt timeout)
+enum KERNEL_RCode kernel_sem_wait(struct KERNEL_Sem *sem, KERNEL_TickCnt timeout)
 {
    return _sem_job_perform(sem, _sem_wait, timeout);
 }
 
 /*
- * See comments in the header file (tn_sem.h)
+ * See comments in the header file (kernel_sem.h)
  */
-enum TN_RCode tn_sem_wait_polling(struct TN_Sem *sem)
+enum KERNEL_RCode kernel_sem_wait_polling(struct KERNEL_Sem *sem)
 {
    return _sem_job_perform(sem, _sem_wait, 0);
 }
 
 /*
- * See comments in the header file (tn_sem.h)
+ * See comments in the header file (kernel_sem.h)
  */
-enum TN_RCode tn_sem_iwait_polling(struct TN_Sem *sem)
+enum KERNEL_RCode kernel_sem_iwait_polling(struct KERNEL_Sem *sem)
 {
    return _sem_job_iperform(sem, _sem_wait);
 }

@@ -1,18 +1,18 @@
 /*******************************************************************************
  *
- * TNeo: real-time kernel initially based on TNKernel
+ * KERNEL: real-time kernel initially based on KERNELKernel
  *
- *    TNKernel:                  copyright 2004, 2013 Yuri Tiomkin.
+ *    KERNELKernel:                  copyright 2004, 2013 Yuri Tiomkin.
  *    PIC32-specific routines:   copyright 2013, 2014 Anders Montonen.
- *    TNeo:                      copyright 2014       Dmitry Frank.
+ *    KERNEL:                      copyright 2014       Dmitry Frank.
  *
- *    TNeo was born as a thorough review and re-implementation of
- *    TNKernel. The new kernel has well-formed code, inherited bugs are fixed
+ *    KERNEL was born as a thorough review and re-implementation of
+ *    KERNELKernel. The new kernel has well-formed code, inherited bugs are fixed
  *    as well as new features being added, and it is tested carefully with
  *    unit-tests.
  *
- *    API is changed somewhat, so it's not 100% compatible with TNKernel,
- *    hence the new name: TNeo.
+ *    API is changed somewhat, so it's not 100% compatible with KERNELKernel,
+ *    hence the new name: KERNEL.
  *
  *    Permission to use, copy, modify, and distribute this software in source
  *    and binary forms and its documentation for any purpose and without fee
@@ -22,7 +22,7 @@
  *
  *    THIS SOFTWARE IS PROVIDED BY THE DMITRY FRANK AND CONTRIBUTORS "AS IS"
  *    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FIKERNELESS FOR A PARTICULAR
  *    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL DMITRY FRANK OR CONTRIBUTORS BE
  *    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  *    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
@@ -37,10 +37,10 @@
 /**
  * \file
  *
- * If `#TN_CHECK_BUILD_CFG` option is non-zero, this file needs to be included
- * in the application project. 
+ * If `#KERNEL_CHECK_BUILD_CFG` option is non-zero, this file needs to be included
+ * in the application project.
  *
- * For details, see the aforementioned option `#TN_CHECK_BUILD_CFG`.
+ * For details, see the aforementioned option `#KERNEL_CHECK_BUILD_CFG`.
  *
  */
 
@@ -49,15 +49,15 @@
  *    INCLUDED FILES
  ******************************************************************************/
 
-#include "tn.h"
+#include "kernel.h"
 
 //-- std header for memset() that is used inside the macro
-//   `_TN_BUILD_CFG_STRUCT_FILL()`
+//   `_KERNEL_BUILD_CFG_STRUCT_FILL()`
 #include <string.h>
 
 
 
-#if TN_CHECK_BUILD_CFG
+#if KERNEL_CHECK_BUILD_CFG
 
 
 /*******************************************************************************
@@ -66,7 +66,7 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-static struct _TN_BuildCfg _build_cfg;
+static struct _KERNEL_BuildCfg _build_cfg;
 
 #endif   // DOXYGEN_SHOULD_SKIP_THIS
 
@@ -86,20 +86,20 @@ static struct _TN_BuildCfg _build_cfg;
 
 /**
  * Dummy function that helps user to undefstand that he/she forgot to add file
- * tn_app_check.c to the project. It is called from tn_sys.c .
+ * kernel_app_check.c to the project. It is called from kernel_sys.c .
  */
-void you_should_add_file___tn_app_check_c___to_the_project(void)
+void you_should_add_file___kernel_app_check_c___to_the_project(void)
 {
 }
 
 /**
  * Return build configuration used for application.
  */
-const struct _TN_BuildCfg *tn_app_build_cfg_get(void)
+const struct _KERNEL_BuildCfg *kernel_app_build_cfg_get(void)
 {
-   _TN_BUILD_CFG_STRUCT_FILL(&_build_cfg);
+   _KERNEL_BUILD_CFG_STRUCT_FILL(&_build_cfg);
    return &_build_cfg;
 }
 
-#endif   // TN_CHECK_BUILD_CFG
+#endif   // KERNEL_CHECK_BUILD_CFG
 

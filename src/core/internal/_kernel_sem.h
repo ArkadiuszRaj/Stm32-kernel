@@ -1,18 +1,18 @@
 /*******************************************************************************
  *
- * TNeo: real-time kernel initially based on TNKernel
+ * KERNEL: real-time kernel initially based on KERNELKernel
  *
- *    TNKernel:                  copyright 2004, 2013 Yuri Tiomkin.
+ *    KERNELKernel:                  copyright 2004, 2013 Yuri Tiomkin.
  *    PIC32-specific routines:   copyright 2013, 2014 Anders Montonen.
- *    TNeo:                      copyright 2014       Dmitry Frank.
+ *    KERNEL:                      copyright 2014       Dmitry Frank.
  *
- *    TNeo was born as a thorough review and re-implementation of
- *    TNKernel. The new kernel has well-formed code, inherited bugs are fixed
+ *    KERNEL was born as a thorough review and re-implementation of
+ *    KERNELKernel. The new kernel has well-formed code, inherited bugs are fixed
  *    as well as new features being added, and it is tested carefully with
  *    unit-tests.
  *
- *    API is changed somewhat, so it's not 100% compatible with TNKernel,
- *    hence the new name: TNeo.
+ *    API is changed somewhat, so it's not 100% compatible with KERNELKernel,
+ *    hence the new name: KERNEL.
  *
  *    Permission to use, copy, modify, and distribute this software in source
  *    and binary forms and its documentation for any purpose and without fee
@@ -22,7 +22,7 @@
  *
  *    THIS SOFTWARE IS PROVIDED BY THE DMITRY FRANK AND CONTRIBUTORS "AS IS"
  *    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FIKERNELESS FOR A PARTICULAR
  *    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL DMITRY FRANK OR CONTRIBUTORS BE
  *    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  *    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
@@ -34,15 +34,15 @@
  *
  ******************************************************************************/
 
-#ifndef __TN_SEM_H
-#define __TN_SEM_H
+#ifndef __KERNEL_SEM_H
+#define __KERNEL_SEM_H
 
 /*******************************************************************************
  *    INCLUDED FILES
  ******************************************************************************/
 
-#include "_tn_sys.h"
-#include "tn_sem.h"
+#include "_kernel_sys.h"
+#include "kernel_sem.h"
 
 
 
@@ -76,14 +76,14 @@ extern "C"  {     /*}*/
  ******************************************************************************/
 
 /**
- * Checks whether given semaphore object is valid 
- * (actually, just checks against `id_sem` field, see `enum #TN_ObjId`)
+ * Checks whether given semaphore object is valid
+ * (actually, just checks against `id_sem` field, see `enum #KERNEL_ObjId`)
  */
-_TN_STATIC_INLINE TN_BOOL _tn_sem_is_valid(
-      const struct TN_Sem    *sem
+_KERNEL_STATIC_INLINE KERNEL_BOOL _kernel_sem_is_valid(
+      const struct KERNEL_Sem    *sem
       )
 {
-   return (sem->id_sem == TN_ID_SEMAPHORE);
+   return (sem->id_sem == KERNEL_ID_SEMAPHORE);
 }
 
 
@@ -93,7 +93,7 @@ _TN_STATIC_INLINE TN_BOOL _tn_sem_is_valid(
 #endif
 
 
-#endif // __TN_SEM_H
+#endif // __KERNEL_SEM_H
 
 
 /*******************************************************************************

@@ -630,7 +630,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>tneo_cortex_m_iar.out</state>
+          <state>kernel_cortex_m_iar.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -912,7 +912,7 @@
         </option>
         <option>
           <name>IarchiveOutput</name>
-          <state>C:\projects\tntest\lib\mc\tnkernel_df\lib_project\cortex_m\tneo_cortex_m_iar\Debug\Exe\tneo_cortex_m_iar.a</state>
+          <state>C:\projects\kerneltest\lib\mc\kernelkernel_df\lib_project\cortex_m\kernel_cortex_m_iar\Debug\Exe\kernel_cortex_m_iar.a</state>
         </option>
       </data>
     </settings>
@@ -1546,7 +1546,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>tneo_cortex_m_iar.out</state>
+          <state>kernel_cortex_m_iar.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -1841,40 +1841,40 @@
   <group>
     <name>arch</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\src\arch\cortex_m\tn_arch_cortex_m.S</name>
+      <name>$PROJ_DIR$\..\..\..\src\arch\cortex_m\kernel_arch_cortex_m.S</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\src\arch\cortex_m\tn_arch_cortex_m_c.c</name>
+      <name>$PROJ_DIR$\..\..\..\src\arch\cortex_m\kernel_arch_cortex_m_c.c</name>
     </file>
   </group>
   <group>
     <name>core</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\src\core\tn_dqueue.c</name>
+      <name>$PROJ_DIR$\..\..\..\src\core\kernel_dqueue.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\src\core\tn_eventgrp.c</name>
+      <name>$PROJ_DIR$\..\..\..\src\core\kernel_eventgrp.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\src\core\tn_fmem.c</name>
+      <name>$PROJ_DIR$\..\..\..\src\core\kernel_fmem.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\src\core\tn_list.c</name>
+      <name>$PROJ_DIR$\..\..\..\src\core\kernel_list.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\src\core\tn_mutex.c</name>
+      <name>$PROJ_DIR$\..\..\..\src\core\kernel_mutex.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\src\core\tn_sem.c</name>
+      <name>$PROJ_DIR$\..\..\..\src\core\kernel_sem.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\src\core\tn_sys.c</name>
+      <name>$PROJ_DIR$\..\..\..\src\core\kernel_sys.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\src\core\tn_tasks.c</name>
+      <name>$PROJ_DIR$\..\..\..\src\core\kernel_tasks.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\src\core\tn_timer.c</name>
+      <name>$PROJ_DIR$\..\..\..\src\core\kernel_timer.c</name>
     </file>
   </group>
 </project>

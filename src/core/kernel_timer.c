@@ -1,18 +1,18 @@
 /*******************************************************************************
  *
- * TNeo: real-time kernel initially based on TNKernel
+ * KERNEL: real-time kernel initially based on KERNELKernel
  *
- *    TNKernel:                  copyright 2004, 2013 Yuri Tiomkin.
+ *    KERNELKernel:                  copyright 2004, 2013 Yuri Tiomkin.
  *    PIC32-specific routines:   copyright 2013, 2014 Anders Montonen.
- *    TNeo:                      copyright 2014       Dmitry Frank.
+ *    KERNEL:                      copyright 2014       Dmitry Frank.
  *
- *    TNeo was born as a thorough review and re-implementation of
- *    TNKernel. The new kernel has well-formed code, inherited bugs are fixed
+ *    KERNEL was born as a thorough review and re-implementation of
+ *    KERNELKernel. The new kernel has well-formed code, inherited bugs are fixed
  *    as well as new features being added, and it is tested carefully with
  *    unit-tests.
  *
- *    API is changed somewhat, so it's not 100% compatible with TNKernel,
- *    hence the new name: TNeo.
+ *    API is changed somewhat, so it's not 100% compatible with KERNELKernel,
+ *    hence the new name: KERNEL.
  *
  *    Permission to use, copy, modify, and distribute this software in source
  *    and binary forms and its documentation for any purpose and without fee
@@ -22,7 +22,7 @@
  *
  *    THIS SOFTWARE IS PROVIDED BY THE DMITRY FRANK AND CONTRIBUTORS "AS IS"
  *    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FIKERNELESS FOR A PARTICULAR
  *    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL DMITRY FRANK OR CONTRIBUTORS BE
  *    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  *    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
@@ -38,14 +38,14 @@
  *    INCLUDED FILES
  ******************************************************************************/
 
-//-- common tnkernel headers
-#include "tn_common.h"
-#include "tn_sys.h"
+//-- common kernelkernel headers
+#include "kernel_common.h"
+#include "kernel_sys.h"
 
 
-//-- internal tnkernel headers
-#include "_tn_timer.h"
-#include "_tn_list.h"
+//-- internal kernelkernel headers
+#include "_kernel_timer.h"
+#include "_kernel_list.h"
 
 
 
@@ -68,43 +68,43 @@
  ******************************************************************************/
 
 //-- Additional param checking {{{
-#if TN_CHECK_PARAM
-_TN_STATIC_INLINE enum TN_RCode _check_param_generic(
-      const struct TN_Timer *timer
+#if KERNEL_CHECK_PARAM
+_KERNEL_STATIC_INLINE enum KERNEL_RCode _check_param_generic(
+      const struct KERNEL_Timer *timer
       )
 {
-   enum TN_RCode rc = TN_RC_OK;
+   enum KERNEL_RCode rc = KERNEL_RC_OK;
 
-   if (timer == TN_NULL){
-      rc = TN_RC_WPARAM;
-   } else if (!_tn_timer_is_valid(timer)){
-      rc = TN_RC_INVALID_OBJ;
+   if (timer == KERNEL_NULL){
+      rc = KERNEL_RC_WPARAM;
+   } else if (!_kernel_timer_is_valid(timer)){
+      rc = KERNEL_RC_INVALID_OBJ;
    }
 
    return rc;
 }
 
-_TN_STATIC_INLINE enum TN_RCode _check_param_create(
-      const struct TN_Timer  *timer,
-      TN_TimerFunc     *func
+_KERNEL_STATIC_INLINE enum KERNEL_RCode _check_param_create(
+      const struct KERNEL_Timer  *timer,
+      KERNEL_TimerFunc     *func
       )
 {
-   enum TN_RCode rc = TN_RC_OK;
+   enum KERNEL_RCode rc = KERNEL_RC_OK;
 
-   if (timer == TN_NULL){
-      rc = TN_RC_WPARAM;
-   } else if (_tn_timer_is_valid(timer)){
-      rc = TN_RC_WPARAM;
+   if (timer == KERNEL_NULL){
+      rc = KERNEL_RC_WPARAM;
+   } else if (_kernel_timer_is_valid(timer)){
+      rc = KERNEL_RC_WPARAM;
    }
 
-   _TN_UNUSED(func);
+   _KERNEL_UNUSED(func);
 
    return rc;
 }
 
 #else
-#  define _check_param_generic(timer)           (TN_RC_OK)
-#  define _check_param_create(timer, func)      (TN_RC_OK)
+#  define _check_param_generic(timer)           (KERNEL_RC_OK)
+#  define _check_param_create(timer, func)      (KERNEL_RC_OK)
 #endif
 // }}}
 
@@ -115,133 +115,133 @@ _TN_STATIC_INLINE enum TN_RCode _check_param_create(
  ******************************************************************************/
 
 /*
- * See comments in the header file (tn_timer.h)
+ * See comments in the header file (kernel_timer.h)
  */
-enum TN_RCode tn_timer_create(
-      struct TN_Timer  *timer,
-      TN_TimerFunc     *func,
+enum KERNEL_RCode kernel_timer_create(
+      struct KERNEL_Timer  *timer,
+      KERNEL_TimerFunc     *func,
       void             *p_user_data
       )
 {
-   enum TN_RCode rc = _check_param_create(timer, func);
+   enum KERNEL_RCode rc = _check_param_create(timer, func);
 
-   if (rc != TN_RC_OK){
+   if (rc != KERNEL_RC_OK){
       //-- just return rc as it is
    } else {
-      rc = _tn_timer_create(timer, func, p_user_data);
+      rc = _kernel_timer_create(timer, func, p_user_data);
    }
 
    return rc;
 }
 
 /*
- * See comments in the header file (tn_timer.h)
+ * See comments in the header file (kernel_timer.h)
  */
-enum TN_RCode tn_timer_delete(struct TN_Timer *timer)
+enum KERNEL_RCode kernel_timer_delete(struct KERNEL_Timer *timer)
 {
-   TN_UWord sr_saved;
-   enum TN_RCode rc = _check_param_generic(timer);
+   KERNEL_UWord sr_saved;
+   enum KERNEL_RCode rc = _check_param_generic(timer);
 
-   if (rc == TN_RC_OK){
-      sr_saved = tn_arch_sr_save_int_dis();
+   if (rc == KERNEL_RC_OK){
+      sr_saved = kernel_arch_sr_save_int_dis();
       //-- if timer is active, cancel it first
-      rc = _tn_timer_cancel(timer);
+      rc = _kernel_timer_cancel(timer);
 
       //-- now, delete timer
-      timer->id_timer = TN_ID_NONE;
-      tn_arch_sr_restore(sr_saved);
+      timer->id_timer = KERNEL_ID_NONE;
+      kernel_arch_sr_restore(sr_saved);
    }
 
    return rc;
 }
 
 /*
- * See comments in the header file (tn_timer.h)
+ * See comments in the header file (kernel_timer.h)
  */
-enum TN_RCode tn_timer_start(struct TN_Timer *timer, TN_TickCnt timeout)
+enum KERNEL_RCode kernel_timer_start(struct KERNEL_Timer *timer, KERNEL_TickCnt timeout)
 {
-   TN_UWord sr_saved;
-   enum TN_RCode rc = _check_param_generic(timer);
+   KERNEL_UWord sr_saved;
+   enum KERNEL_RCode rc = _check_param_generic(timer);
 
-   if (rc == TN_RC_OK){
-      sr_saved = tn_arch_sr_save_int_dis();
-      rc = _tn_timer_start(timer, timeout);
-      tn_arch_sr_restore(sr_saved);
+   if (rc == KERNEL_RC_OK){
+      sr_saved = kernel_arch_sr_save_int_dis();
+      rc = _kernel_timer_start(timer, timeout);
+      kernel_arch_sr_restore(sr_saved);
    }
 
    return rc;
 }
 
 /*
- * See comments in the header file (tn_timer.h)
+ * See comments in the header file (kernel_timer.h)
  */
-enum TN_RCode tn_timer_cancel(struct TN_Timer *timer)
+enum KERNEL_RCode kernel_timer_cancel(struct KERNEL_Timer *timer)
 {
-   TN_UWord sr_saved;
-   enum TN_RCode rc = _check_param_generic(timer);
+   KERNEL_UWord sr_saved;
+   enum KERNEL_RCode rc = _check_param_generic(timer);
 
-   if (rc == TN_RC_OK){
-      sr_saved = tn_arch_sr_save_int_dis();
-      rc = _tn_timer_cancel(timer);
-      tn_arch_sr_restore(sr_saved);
+   if (rc == KERNEL_RC_OK){
+      sr_saved = kernel_arch_sr_save_int_dis();
+      rc = _kernel_timer_cancel(timer);
+      kernel_arch_sr_restore(sr_saved);
    }
 
    return rc;
 }
 
 /*
- * See comments in the header file (tn_timer.h)
+ * See comments in the header file (kernel_timer.h)
  */
-enum TN_RCode tn_timer_set_func(
-      struct TN_Timer  *timer,
-      TN_TimerFunc     *func,
+enum KERNEL_RCode kernel_timer_set_func(
+      struct KERNEL_Timer  *timer,
+      KERNEL_TimerFunc     *func,
       void             *p_user_data
       )
 {
-   TN_UWord sr_saved;
-   enum TN_RCode rc = _check_param_generic(timer);
+   KERNEL_UWord sr_saved;
+   enum KERNEL_RCode rc = _check_param_generic(timer);
 
-   if (rc == TN_RC_OK){
-      sr_saved = tn_arch_sr_save_int_dis();
-      rc = _tn_timer_set_func(timer, func, p_user_data);
-      tn_arch_sr_restore(sr_saved);
+   if (rc == KERNEL_RC_OK){
+      sr_saved = kernel_arch_sr_save_int_dis();
+      rc = _kernel_timer_set_func(timer, func, p_user_data);
+      kernel_arch_sr_restore(sr_saved);
    }
 
    return rc;
 }
 
 /*
- * See comments in the header file (tn_timer.h)
+ * See comments in the header file (kernel_timer.h)
  */
-enum TN_RCode tn_timer_is_active(struct TN_Timer *timer, TN_BOOL *p_is_active)
+enum KERNEL_RCode kernel_timer_is_active(struct KERNEL_Timer *timer, KERNEL_BOOL *p_is_active)
 {
-   TN_UWord sr_saved;
-   enum TN_RCode rc = _check_param_generic(timer);
+   KERNEL_UWord sr_saved;
+   enum KERNEL_RCode rc = _check_param_generic(timer);
 
-   if (rc == TN_RC_OK){
-      sr_saved = tn_arch_sr_save_int_dis();
-      *p_is_active = _tn_timer_is_active(timer);
-      tn_arch_sr_restore(sr_saved);
+   if (rc == KERNEL_RC_OK){
+      sr_saved = kernel_arch_sr_save_int_dis();
+      *p_is_active = _kernel_timer_is_active(timer);
+      kernel_arch_sr_restore(sr_saved);
    }
 
    return rc;
 }
 
 /*
- * See comments in the header file (tn_timer.h)
+ * See comments in the header file (kernel_timer.h)
  */
-enum TN_RCode tn_timer_time_left(
-      struct TN_Timer *timer,
-      TN_TickCnt *p_time_left
+enum KERNEL_RCode kernel_timer_time_left(
+      struct KERNEL_Timer *timer,
+      KERNEL_TickCnt *p_time_left
       )
 {
-   TN_UWord sr_saved;
-   enum TN_RCode rc = _check_param_generic(timer);
+   KERNEL_UWord sr_saved;
+   enum KERNEL_RCode rc = _check_param_generic(timer);
 
-   if (rc == TN_RC_OK){
-      sr_saved = tn_arch_sr_save_int_dis();
-      *p_time_left = _tn_timer_time_left(timer);
-      tn_arch_sr_restore(sr_saved);
+   if (rc == KERNEL_RC_OK){
+      sr_saved = kernel_arch_sr_save_int_dis();
+      *p_time_left = _kernel_timer_time_left(timer);
+      kernel_arch_sr_restore(sr_saved);
    }
 
    return rc;
@@ -257,47 +257,47 @@ enum TN_RCode tn_timer_time_left(
 
 
 /**
- * See comments in the _tn_timer.h file.
+ * See comments in the _kernel_timer.h file.
  */
-enum TN_RCode _tn_timer_create(
-      struct TN_Timer  *timer,
-      TN_TimerFunc     *func,
+enum KERNEL_RCode _kernel_timer_create(
+      struct KERNEL_Timer  *timer,
+      KERNEL_TimerFunc     *func,
       void             *p_user_data
       )
 {
-   enum TN_RCode rc = _tn_timer_set_func(timer, func, p_user_data);
+   enum KERNEL_RCode rc = _kernel_timer_set_func(timer, func, p_user_data);
 
-   if (rc != TN_RC_OK){
+   if (rc != KERNEL_RC_OK){
       //-- just return rc as it is
    } else {
 
-      _tn_list_reset(&(timer->timer_queue));
+      _kernel_list_reset(&(timer->timer_queue));
 
-#if TN_DYNAMIC_TICK
+#if KERNEL_DYNAMIC_TICK
       timer->timeout = 0;
       timer->start_tick_cnt = 0;
 #else
       timer->timeout_cur   = 0;
 #endif
-      timer->id_timer      = TN_ID_TIMER;
+      timer->id_timer      = KERNEL_ID_TIMER;
 
    }
    return rc;
 }
 
 /**
- * See comments in the _tn_timer.h file.
+ * See comments in the _kernel_timer.h file.
  */
-enum TN_RCode _tn_timer_set_func(
-      struct TN_Timer  *timer,
-      TN_TimerFunc     *func,
+enum KERNEL_RCode _kernel_timer_set_func(
+      struct KERNEL_Timer  *timer,
+      KERNEL_TimerFunc     *func,
       void             *p_user_data
       )
 {
-   enum TN_RCode rc = TN_RC_OK;
+   enum KERNEL_RCode rc = KERNEL_RC_OK;
 
-   if (func == TN_NULL){
-      rc = TN_RC_WPARAM;
+   if (func == KERNEL_NULL){
+      rc = KERNEL_RC_WPARAM;
    } else {
       timer->func          = func;
       timer->p_user_data   = p_user_data;
@@ -307,14 +307,14 @@ enum TN_RCode _tn_timer_set_func(
 }
 
 /**
- * See comments in the _tn_timer.h file.
+ * See comments in the _kernel_timer.h file.
  */
-TN_BOOL _tn_timer_is_active(struct TN_Timer *timer)
+KERNEL_BOOL _kernel_timer_is_active(struct KERNEL_Timer *timer)
 {
    //-- interrupts should be disabled here
-   _TN_BUG_ON( !TN_IS_INT_DISABLED() );
+   _KERNEL_BUG_ON( !KERNEL_IS_INT_DISABLED() );
 
-   return (!_tn_list_is_empty(&(timer->timer_queue)));
+   return (!_kernel_list_is_empty(&(timer->timer_queue)));
 }
 
 

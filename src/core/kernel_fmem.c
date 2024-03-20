@@ -1,18 +1,18 @@
 /*******************************************************************************
  *
- * TNeo: real-time kernel initially based on TNKernel
+ * KERNEL: real-time kernel initially based on KERNELKernel
  *
- *    TNKernel:                  copyright 2004, 2013 Yuri Tiomkin.
+ *    KERNELKernel:                  copyright 2004, 2013 Yuri Tiomkin.
  *    PIC32-specific routines:   copyright 2013, 2014 Anders Montonen.
- *    TNeo:                      copyright 2014       Dmitry Frank.
+ *    KERNEL:                      copyright 2014       Dmitry Frank.
  *
- *    TNeo was born as a thorough review and re-implementation of
- *    TNKernel. The new kernel has well-formed code, inherited bugs are fixed
+ *    KERNEL was born as a thorough review and re-implementation of
+ *    KERNELKernel. The new kernel has well-formed code, inherited bugs are fixed
  *    as well as new features being added, and it is tested carefully with
  *    unit-tests.
  *
- *    API is changed somewhat, so it's not 100% compatible with TNKernel,
- *    hence the new name: TNeo.
+ *    API is changed somewhat, so it's not 100% compatible with KERNELKernel,
+ *    hence the new name: KERNEL.
  *
  *    Permission to use, copy, modify, and distribute this software in source
  *    and binary forms and its documentation for any purpose and without fee
@@ -22,7 +22,7 @@
  *
  *    THIS SOFTWARE IS PROVIDED BY THE DMITRY FRANK AND CONTRIBUTORS "AS IS"
  *    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FIKERNELESS FOR A PARTICULAR
  *    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL DMITRY FRANK OR CONTRIBUTORS BE
  *    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  *    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
@@ -39,21 +39,21 @@
  ******************************************************************************/
 
 
-//-- common tnkernel headers
-#include "tn_common.h"
-#include "tn_sys.h"
+//-- common kernelkernel headers
+#include "kernel_common.h"
+#include "kernel_sys.h"
 
-//-- internal tnkernel headers
-#include "_tn_tasks.h"
-#include "_tn_list.h"
+//-- internal kernelkernel headers
+#include "_kernel_tasks.h"
+#include "_kernel_list.h"
 
 
 //-- header of current module
-#include "tn_fmem.h"
-#include "_tn_fmem.h"
+#include "kernel_fmem.h"
+#include "_kernel_fmem.h"
 
 //-- header of other needed modules
-#include "tn_tasks.h"
+#include "kernel_tasks.h"
 
 
 
@@ -69,89 +69,89 @@
  ******************************************************************************/
 
 //-- Additional param checking {{{
-#if TN_CHECK_PARAM
-_TN_STATIC_INLINE enum TN_RCode _check_param_fmem_create(
-      const struct TN_FMem *fmem
+#if KERNEL_CHECK_PARAM
+_KERNEL_STATIC_INLINE enum KERNEL_RCode _check_param_fmem_create(
+      const struct KERNEL_FMem *fmem
       )
 {
-   enum TN_RCode rc = TN_RC_OK;
+   enum KERNEL_RCode rc = KERNEL_RC_OK;
 
-   if (fmem == TN_NULL){
-      rc = TN_RC_WPARAM;
-   } else if (_tn_fmem_is_valid(fmem)){
-      rc = TN_RC_WPARAM;
+   if (fmem == KERNEL_NULL){
+      rc = KERNEL_RC_WPARAM;
+   } else if (_kernel_fmem_is_valid(fmem)){
+      rc = KERNEL_RC_WPARAM;
    }
 
    return rc;
 }
 
-_TN_STATIC_INLINE enum TN_RCode _check_param_fmem_delete(
-      const struct TN_FMem *fmem
+_KERNEL_STATIC_INLINE enum KERNEL_RCode _check_param_fmem_delete(
+      const struct KERNEL_FMem *fmem
       )
 {
-   enum TN_RCode rc = TN_RC_OK;
+   enum KERNEL_RCode rc = KERNEL_RC_OK;
 
-   if (fmem == TN_NULL){
-      rc = TN_RC_WPARAM;
-   } else if (!_tn_fmem_is_valid(fmem)){
-      rc = TN_RC_INVALID_OBJ;
+   if (fmem == KERNEL_NULL){
+      rc = KERNEL_RC_WPARAM;
+   } else if (!_kernel_fmem_is_valid(fmem)){
+      rc = KERNEL_RC_INVALID_OBJ;
    }
 
    return rc;
 }
 
-_TN_STATIC_INLINE enum TN_RCode _check_param_job_perform(
-      const struct TN_FMem *fmem,
+_KERNEL_STATIC_INLINE enum KERNEL_RCode _check_param_job_perform(
+      const struct KERNEL_FMem *fmem,
       void *p_data
       )
 {
-   enum TN_RCode rc = TN_RC_OK;
+   enum KERNEL_RCode rc = KERNEL_RC_OK;
 
-   if (fmem == TN_NULL || p_data == TN_NULL){
-      rc = TN_RC_WPARAM;
-   } else if (!_tn_fmem_is_valid(fmem)){
-      rc = TN_RC_INVALID_OBJ;
+   if (fmem == KERNEL_NULL || p_data == KERNEL_NULL){
+      rc = KERNEL_RC_WPARAM;
+   } else if (!_kernel_fmem_is_valid(fmem)){
+      rc = KERNEL_RC_INVALID_OBJ;
    }
 
    return rc;
 }
 
-_TN_STATIC_INLINE enum TN_RCode _check_param_generic(
-      const struct TN_FMem *fmem
+_KERNEL_STATIC_INLINE enum KERNEL_RCode _check_param_generic(
+      const struct KERNEL_FMem *fmem
       )
 {
-   enum TN_RCode rc = TN_RC_OK;
+   enum KERNEL_RCode rc = KERNEL_RC_OK;
 
-   if (fmem == TN_NULL){
-      rc = TN_RC_WPARAM;
-   } else if (!_tn_fmem_is_valid(fmem)){
-      rc = TN_RC_INVALID_OBJ;
+   if (fmem == KERNEL_NULL){
+      rc = KERNEL_RC_WPARAM;
+   } else if (!_kernel_fmem_is_valid(fmem)){
+      rc = KERNEL_RC_INVALID_OBJ;
    }
 
    return rc;
 }
 #else
-#  define _check_param_fmem_create(fmem)               (TN_RC_OK)
-#  define _check_param_fmem_delete(fmem)               (TN_RC_OK)
-#  define _check_param_job_perform(fmem, p_data)       (TN_RC_OK)
-#  define _check_param_generic(fmem)                   (TN_RC_OK)
+#  define _check_param_fmem_create(fmem)               (KERNEL_RC_OK)
+#  define _check_param_fmem_delete(fmem)               (KERNEL_RC_OK)
+#  define _check_param_job_perform(fmem, p_data)       (KERNEL_RC_OK)
+#  define _check_param_generic(fmem)                   (KERNEL_RC_OK)
 #endif
 // }}}
 
 /**
- * Callback function that is given to `_tn_task_first_wait_complete()`
+ * Callback function that is given to `_kernel_task_first_wait_complete()`
  * when task finishes waiting for free block in the memory pool.
  *
- * See `#_TN_CBBeforeTaskWaitComplete` for details on function signature.
+ * See `#_KERNEL_CBBeforeTaskWaitComplete` for details on function signature.
  */
 static void _cb_before_task_wait_complete(
-      struct TN_Task   *task,
+      struct KERNEL_Task   *task,
       void             *user_data_1,
       void             *user_data_2
       )
 {
    task->subsys_wait.fmem.data_elem = user_data_1;
-   _TN_UNUSED(user_data_2);
+   _KERNEL_UNUSED(user_data_2);
 }
 
 /**
@@ -159,18 +159,18 @@ static void _cb_before_task_wait_complete(
  *
  * If there is free memory block, it is allocated and the address of it is
  * stored at the provided location (`p_data`). Otherwise (no free blocks),
- * `#TN_RC_TIMEOUT` is returned, and this case can be handled by the caller.
+ * `#KERNEL_RC_TIMEOUT` is returned, and this case can be handled by the caller.
  *
  * @param fmem
  *    Memory pool from which block should be taken
  * @param p_data
- *    Pointer to where the result should be stored (if `#TN_RC_TIMEOUT` is
+ *    Pointer to where the result should be stored (if `#KERNEL_RC_TIMEOUT` is
  *    returned, this location isn't altered)
  */
-_TN_STATIC_INLINE enum TN_RCode _fmem_get(struct TN_FMem *fmem, void **p_data)
+_KERNEL_STATIC_INLINE enum KERNEL_RCode _fmem_get(struct KERNEL_FMem *fmem, void **p_data)
 {
-   enum TN_RCode rc;
-   void *ptr = TN_NULL;
+   enum KERNEL_RCode rc;
+   void *ptr = KERNEL_NULL;
 
    if (fmem->free_blocks_cnt > 0){
       //-- Get first block from the pool
@@ -192,10 +192,10 @@ _TN_STATIC_INLINE enum TN_RCode _fmem_get(struct TN_FMem *fmem, void **p_data)
       //   location.
       *p_data = ptr;
 
-      rc = TN_RC_OK;
+      rc = KERNEL_RC_OK;
    } else {
       //-- There are no free memory blocks.
-      rc = TN_RC_TIMEOUT;
+      rc = KERNEL_RC_TIMEOUT;
    }
 
    return rc;
@@ -216,20 +216,20 @@ _TN_STATIC_INLINE enum TN_RCode _fmem_get(struct TN_FMem *fmem, void **p_data)
  *    Pointer to the memory block to release.
  *
  * @return
- *    - `#TN_RC_OK`, if operation was successful
- *    - `#TN_RC_OVERFLOW`, if memory pool already has all its blocks free.
+ *    - `#KERNEL_RC_OK`, if operation was successful
+ *    - `#KERNEL_RC_OVERFLOW`, if memory pool already has all its blocks free.
  *      This may never happen in normal program execution; if that happens,
  *      it's a programmer's mistake.
  */
-_TN_STATIC_INLINE enum TN_RCode _fmem_release(struct TN_FMem *fmem, void *p_data)
+_KERNEL_STATIC_INLINE enum KERNEL_RCode _fmem_release(struct KERNEL_FMem *fmem, void *p_data)
 {
-   enum TN_RCode rc = TN_RC_OK;
+   enum KERNEL_RCode rc = KERNEL_RC_OK;
 
    //-- Check if there are tasks waiting for memory block. If there is,
    //   give the block to the first task from the queue.
-   if (  !_tn_task_first_wait_complete(
-            &fmem->wait_queue, TN_RC_OK,
-            _cb_before_task_wait_complete, p_data, TN_NULL
+   if (  !_kernel_task_first_wait_complete(
+            &fmem->wait_queue, KERNEL_RC_OK,
+            _cb_before_task_wait_complete, p_data, KERNEL_NULL
             )
       )
    {
@@ -237,22 +237,22 @@ _TN_STATIC_INLINE enum TN_RCode _fmem_release(struct TN_FMem *fmem, void *p_data
       //   insert in to the memory pool
 
       if (fmem->free_blocks_cnt < fmem->blocks_cnt){
-         //-- Insert block into free block list. 
+         //-- Insert block into free block list.
          //   See comments inside `_fmem_get()` for more detailed explanation
          //   of how the kernel keeps track of free blocks.
          *(void **)p_data = fmem->free_list;
          fmem->free_list = p_data;
          fmem->free_blocks_cnt++;
       } else {
-#if TN_DEBUG
+#if KERNEL_DEBUG
          if (fmem->free_blocks_cnt > fmem->blocks_cnt){
-            _TN_FATAL_ERROR(
+            _KERNEL_FATAL_ERROR(
                   "free_blocks_cnt should never be more than blocks_cnt"
                   );
          }
 #endif
          //-- the memory pool already has all the blocks free
-         rc = TN_RC_OVERFLOW;
+         rc = KERNEL_RC_OVERFLOW;
       }
    }
 
@@ -268,45 +268,45 @@ _TN_STATIC_INLINE enum TN_RCode _fmem_release(struct TN_FMem *fmem, void *p_data
  ******************************************************************************/
 
 /*
- * See comments in the header file (tn_dqueue.h)
+ * See comments in the header file (kernel_dqueue.h)
  */
-enum TN_RCode tn_fmem_create(
-      struct TN_FMem   *fmem,
+enum KERNEL_RCode kernel_fmem_create(
+      struct KERNEL_FMem   *fmem,
       void             *start_addr,
       unsigned int      block_size,
       int               blocks_cnt
       )
 {
-   enum TN_RCode rc;
+   enum KERNEL_RCode rc;
 
    rc = _check_param_fmem_create(fmem);
-   if (rc != TN_RC_OK){
+   if (rc != KERNEL_RC_OK){
       goto out;
    }
 
-   //-- basic check: start_addr should not be TN_NULL,
+   //-- basic check: start_addr should not be KERNEL_NULL,
    //   and blocks_cnt should be at least 2
-   if (start_addr == TN_NULL || blocks_cnt < 2){
-      rc = TN_RC_WPARAM;
+   if (start_addr == KERNEL_NULL || blocks_cnt < 2){
+      rc = KERNEL_RC_WPARAM;
       goto out;
    }
 
    //-- check that start_addr is aligned properly
    {
-      TN_UIntPtr start_addr_aligned 
-         = TN_MAKE_ALIG_SIZE((TN_UIntPtr)start_addr);
+      KERNEL_UIntPtr start_addr_aligned
+         = KERNEL_MAKE_ALIG_SIZE((KERNEL_UIntPtr)start_addr);
 
-      if (start_addr_aligned != (TN_UIntPtr)start_addr){
-         rc = TN_RC_WPARAM;
+      if (start_addr_aligned != (KERNEL_UIntPtr)start_addr){
+         rc = KERNEL_RC_WPARAM;
          goto out;
       }
    }
 
    //-- check that block_size is aligned properly
    {
-      unsigned int block_size_aligned = TN_MAKE_ALIG_SIZE(block_size);
+      unsigned int block_size_aligned = KERNEL_MAKE_ALIG_SIZE(block_size);
       if (block_size_aligned != block_size){
-         rc = TN_RC_WPARAM;
+         rc = KERNEL_RC_WPARAM;
          goto out;
       }
    }
@@ -318,7 +318,7 @@ enum TN_RCode tn_fmem_create(
    fmem->blocks_cnt = blocks_cnt;
 
    //-- reset wait_queue
-   _tn_list_reset(&(fmem->wait_queue));
+   _kernel_list_reset(&(fmem->wait_queue));
 
    //-- init block pointers
    {
@@ -333,14 +333,14 @@ enum TN_RCode tn_fmem_create(
          p_tmp   = (void **)p_block;
          p_block += fmem->block_size;
       }
-      *p_tmp = TN_NULL;          //-- Last memory block first cell contents -  TN_NULL
+      *p_tmp = KERNEL_NULL;          //-- Last memory block first cell contents -  KERNEL_NULL
 
       fmem->free_list       = fmem->start_addr;
       fmem->free_blocks_cnt = fmem->blocks_cnt;
    }
 
    //-- set id
-   fmem->id_fmp = TN_ID_FSMEMORYPOOL;
+   fmem->id_fmp = KERNEL_ID_FSMEMORYPOOL;
 
 out:
    return rc;
@@ -348,31 +348,31 @@ out:
 
 
 /*
- * See comments in the header file (tn_dqueue.h)
+ * See comments in the header file (kernel_dqueue.h)
  */
-enum TN_RCode tn_fmem_delete(struct TN_FMem *fmem)
+enum KERNEL_RCode kernel_fmem_delete(struct KERNEL_FMem *fmem)
 {
-   enum TN_RCode rc = _check_param_fmem_delete(fmem);
+   enum KERNEL_RCode rc = _check_param_fmem_delete(fmem);
 
-   if (rc != TN_RC_OK){
+   if (rc != KERNEL_RC_OK){
       //-- just return rc as it is
-   } else if (!tn_is_task_context()){
-      rc = TN_RC_WCONTEXT;
+   } else if (!kernel_is_task_context()){
+      rc = KERNEL_RC_WCONTEXT;
    } else {
-      TN_INTSAVE_DATA;
+      KERNEL_INTSAVE_DATA;
 
-      TN_INT_DIS_SAVE();
+      KERNEL_INT_DIS_SAVE();
 
       //-- remove all tasks (if any) from fmem's wait queue
-      _tn_wait_queue_notify_deleted(&(fmem->wait_queue));
+      _kernel_wait_queue_notify_deleted(&(fmem->wait_queue));
 
-      fmem->id_fmp = TN_ID_NONE;   //-- Fixed-size memory pool does not exist now
+      fmem->id_fmp = KERNEL_ID_NONE;   //-- Fixed-size memory pool does not exist now
 
-      TN_INT_RESTORE();
+      KERNEL_INT_RESTORE();
 
-      //-- we might need to switch context if _tn_wait_queue_notify_deleted()
+      //-- we might need to switch context if _kernel_wait_queue_notify_deleted()
       //   has woken up some high-priority task
-      _tn_context_switch_pend_if_needed();
+      _kernel_context_switch_pend_if_needed();
 
    }
    return rc;
@@ -380,48 +380,48 @@ enum TN_RCode tn_fmem_delete(struct TN_FMem *fmem)
 
 
 /*
- * See comments in the header file (tn_dqueue.h)
+ * See comments in the header file (kernel_dqueue.h)
  */
-enum TN_RCode tn_fmem_get(
-      struct TN_FMem *fmem,
+enum KERNEL_RCode kernel_fmem_get(
+      struct KERNEL_FMem *fmem,
       void **p_data,
-      TN_TickCnt timeout
+      KERNEL_TickCnt timeout
       )
 {
-   TN_BOOL waited_for_data = TN_FALSE;
-   enum TN_RCode rc = _check_param_job_perform(fmem, p_data);
+   KERNEL_BOOL waited_for_data = KERNEL_FALSE;
+   enum KERNEL_RCode rc = _check_param_job_perform(fmem, p_data);
 
-   if (rc != TN_RC_OK){
+   if (rc != KERNEL_RC_OK){
       //-- just return rc as it is
-   } else if (!tn_is_task_context()){
-      rc = TN_RC_WCONTEXT;
+   } else if (!kernel_is_task_context()){
+      rc = KERNEL_RC_WCONTEXT;
    } else {
-      TN_INTSAVE_DATA;
+      KERNEL_INTSAVE_DATA;
 
-      TN_INT_DIS_SAVE();
+      KERNEL_INT_DIS_SAVE();
 
       rc = _fmem_get(fmem, p_data);
 
-      if (rc == TN_RC_TIMEOUT && timeout > 0){
-         _tn_task_curr_to_wait_action(
+      if (rc == KERNEL_RC_TIMEOUT && timeout > 0){
+         _kernel_task_curr_to_wait_action(
                &(fmem->wait_queue),
-               TN_WAIT_REASON_WFIXMEM,
+               KERNEL_WAIT_REASON_WFIXMEM,
                timeout
                );
-         waited_for_data = TN_TRUE;
+         waited_for_data = KERNEL_TRUE;
       }
 
-      TN_INT_RESTORE();
-      _tn_context_switch_pend_if_needed();
+      KERNEL_INT_RESTORE();
+      _kernel_context_switch_pend_if_needed();
       if (waited_for_data){
 
          //-- get wait result
-         rc = _tn_curr_run_task->task_wait_rc;
+         rc = _kernel_curr_run_task->task_wait_rc;
 
-         //-- if wait result is TN_RC_OK, copy memory block pointer to the
+         //-- if wait result is KERNEL_RC_OK, copy memory block pointer to the
          //   user's location
-         if (rc == TN_RC_OK){
-            *p_data = _tn_curr_run_task->subsys_wait.fmem.data_elem;
+         if (rc == KERNEL_RC_OK){
+            *p_data = _kernel_curr_run_task->subsys_wait.fmem.data_elem;
          }
 
       }
@@ -432,22 +432,22 @@ enum TN_RCode tn_fmem_get(
 
 
 /*
- * See comments in the header file (tn_dqueue.h)
+ * See comments in the header file (kernel_dqueue.h)
  */
-enum TN_RCode tn_fmem_get_polling(struct TN_FMem *fmem,void **p_data)
+enum KERNEL_RCode kernel_fmem_get_polling(struct KERNEL_FMem *fmem,void **p_data)
 {
-   enum TN_RCode rc = _check_param_job_perform(fmem, p_data);
+   enum KERNEL_RCode rc = _check_param_job_perform(fmem, p_data);
 
-   if (rc != TN_RC_OK){
+   if (rc != KERNEL_RC_OK){
       //-- just return rc as it is
-   } else if (!tn_is_task_context()){
-      rc = TN_RC_WCONTEXT;
+   } else if (!kernel_is_task_context()){
+      rc = KERNEL_RC_WCONTEXT;
    } else {
-      TN_INTSAVE_DATA;
+      KERNEL_INTSAVE_DATA;
 
-      TN_INT_DIS_SAVE();
+      KERNEL_INT_DIS_SAVE();
       rc = _fmem_get(fmem, p_data);
-      TN_INT_RESTORE();
+      KERNEL_INT_RESTORE();
    }
 
    return rc;
@@ -455,89 +455,89 @@ enum TN_RCode tn_fmem_get_polling(struct TN_FMem *fmem,void **p_data)
 
 
 /*
- * See comments in the header file (tn_dqueue.h)
+ * See comments in the header file (kernel_dqueue.h)
  */
-enum TN_RCode tn_fmem_iget_polling(struct TN_FMem *fmem, void **p_data)
+enum KERNEL_RCode kernel_fmem_iget_polling(struct KERNEL_FMem *fmem, void **p_data)
 {
-   enum TN_RCode rc = _check_param_job_perform(fmem, p_data);
+   enum KERNEL_RCode rc = _check_param_job_perform(fmem, p_data);
 
-   if (rc != TN_RC_OK){
+   if (rc != KERNEL_RC_OK){
       //-- just return rc as it is
-   } else if (!tn_is_isr_context()){
-      rc = TN_RC_WCONTEXT;
+   } else if (!kernel_is_isr_context()){
+      rc = KERNEL_RC_WCONTEXT;
    } else {
-      TN_INTSAVE_DATA_INT;
+      KERNEL_INTSAVE_DATA_INT;
 
-      TN_INT_IDIS_SAVE();
+      KERNEL_INT_IDIS_SAVE();
 
       rc = _fmem_get(fmem, p_data);
 
-      TN_INT_IRESTORE();
-      _TN_CONTEXT_SWITCH_IPEND_IF_NEEDED();
+      KERNEL_INT_IRESTORE();
+      _KERNEL_CONTEXT_SWITCH_IPEND_IF_NEEDED();
    }
    return rc;
 }
 
 
 /*
- * See comments in the header file (tn_dqueue.h)
+ * See comments in the header file (kernel_dqueue.h)
  */
-enum TN_RCode tn_fmem_release(struct TN_FMem *fmem, void *p_data)
+enum KERNEL_RCode kernel_fmem_release(struct KERNEL_FMem *fmem, void *p_data)
 {
-   enum TN_RCode rc = _check_param_job_perform(fmem, p_data);
+   enum KERNEL_RCode rc = _check_param_job_perform(fmem, p_data);
 
-   if (rc != TN_RC_OK){
+   if (rc != KERNEL_RC_OK){
       //-- just return rc as it is
-   } else if (!tn_is_task_context()){
-      rc = TN_RC_WCONTEXT;
+   } else if (!kernel_is_task_context()){
+      rc = KERNEL_RC_WCONTEXT;
    } else {
-      TN_INTSAVE_DATA;
+      KERNEL_INTSAVE_DATA;
 
-      TN_INT_DIS_SAVE();
+      KERNEL_INT_DIS_SAVE();
 
       rc = _fmem_release(fmem, p_data);
 
-      TN_INT_RESTORE();
-      _tn_context_switch_pend_if_needed();
+      KERNEL_INT_RESTORE();
+      _kernel_context_switch_pend_if_needed();
    }
    return rc;
 }
 
 
 /*
- * See comments in the header file (tn_dqueue.h)
+ * See comments in the header file (kernel_dqueue.h)
  */
-enum TN_RCode tn_fmem_irelease(struct TN_FMem *fmem, void *p_data)
+enum KERNEL_RCode kernel_fmem_irelease(struct KERNEL_FMem *fmem, void *p_data)
 {
-   enum TN_RCode rc = _check_param_job_perform(fmem, p_data);
+   enum KERNEL_RCode rc = _check_param_job_perform(fmem, p_data);
 
-   if (rc != TN_RC_OK){
+   if (rc != KERNEL_RC_OK){
       //-- just return rc as it is
-   } else if (!tn_is_isr_context()){
-      rc = TN_RC_WCONTEXT;
+   } else if (!kernel_is_isr_context()){
+      rc = KERNEL_RC_WCONTEXT;
    } else {
-      TN_INTSAVE_DATA_INT;
+      KERNEL_INTSAVE_DATA_INT;
 
-      TN_INT_IDIS_SAVE();
+      KERNEL_INT_IDIS_SAVE();
 
       rc = _fmem_release(fmem, p_data);
 
-      TN_INT_IRESTORE();
-      _TN_CONTEXT_SWITCH_IPEND_IF_NEEDED();
+      KERNEL_INT_IRESTORE();
+      _KERNEL_CONTEXT_SWITCH_IPEND_IF_NEEDED();
    }
 
    return rc;
 }
 
 /*
- * See comments in the header file (tn_dqueue.h)
+ * See comments in the header file (kernel_dqueue.h)
  */
-int tn_fmem_free_blocks_cnt_get(struct TN_FMem *fmem)
+int kernel_fmem_free_blocks_cnt_get(struct KERNEL_FMem *fmem)
 {
    int ret = -1;
 
-   enum TN_RCode rc = _check_param_generic(fmem);
-   if (rc == TN_RC_OK){
+   enum KERNEL_RCode rc = _check_param_generic(fmem);
+   if (rc == KERNEL_RC_OK){
       //-- It's not needed to disable interrupts here, since `free_blocks_cnt`
       //   is read by just one assembler instruction
       ret = fmem->free_blocks_cnt;
@@ -547,14 +547,14 @@ int tn_fmem_free_blocks_cnt_get(struct TN_FMem *fmem)
 }
 
 /*
- * See comments in the header file (tn_dqueue.h)
+ * See comments in the header file (kernel_dqueue.h)
  */
-int tn_fmem_used_blocks_cnt_get(struct TN_FMem *fmem)
+int kernel_fmem_used_blocks_cnt_get(struct KERNEL_FMem *fmem)
 {
    int ret = -1;
 
-   enum TN_RCode rc = _check_param_generic(fmem);
-   if (rc == TN_RC_OK){
+   enum KERNEL_RCode rc = _check_param_generic(fmem);
+   if (rc == KERNEL_RC_OK){
       //-- It's not needed to disable interrupts here, since `free_blocks_cnt`
       //   is read by just one assembler instruction, and `blocks_cnt` never
       //   changes.

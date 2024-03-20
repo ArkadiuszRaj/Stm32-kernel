@@ -1,18 +1,18 @@
 /*******************************************************************************
  *
- * TNeo: real-time kernel initially based on TNKernel
+ * KERNEL: real-time kernel initially based on KERNELKernel
  *
- *    TNKernel:                  copyright 2004, 2013 Yuri Tiomkin.
+ *    KERNELKernel:                  copyright 2004, 2013 Yuri Tiomkin.
  *    PIC32-specific routines:   copyright 2013, 2014 Anders Montonen.
- *    TNeo:                      copyright 2014       Dmitry Frank.
+ *    KERNEL:                      copyright 2014       Dmitry Frank.
  *
- *    TNeo was born as a thorough review and re-implementation of
- *    TNKernel. The new kernel has well-formed code, inherited bugs are fixed
+ *    KERNEL was born as a thorough review and re-implementation of
+ *    KERNELKernel. The new kernel has well-formed code, inherited bugs are fixed
  *    as well as new features being added, and it is tested carefully with
  *    unit-tests.
  *
- *    API is changed somewhat, so it's not 100% compatible with TNKernel,
- *    hence the new name: TNeo.
+ *    API is changed somewhat, so it's not 100% compatible with KERNELKernel,
+ *    hence the new name: KERNEL.
  *
  *    Permission to use, copy, modify, and distribute this software in source
  *    and binary forms and its documentation for any purpose and without fee
@@ -22,7 +22,7 @@
  *
  *    THIS SOFTWARE IS PROVIDED BY THE DMITRY FRANK AND CONTRIBUTORS "AS IS"
  *    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FIKERNELESS FOR A PARTICULAR
  *    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL DMITRY FRANK OR CONTRIBUTORS BE
  *    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  *    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
@@ -39,11 +39,11 @@
  *
  * Event group.
  *
- * An event group has an internal variable (of type `#TN_UWord`), which is
+ * An event group has an internal variable (of type `#KERNEL_UWord`), which is
  * interpreted as a bit pattern where each bit represents an event. An event
  * group also has a wait queue for the tasks waiting on these events. A task
  * may set specified bits when an event occurs and may clear specified bits
- * when necessary. 
+ * when necessary.
  *
  * The tasks waiting for an event(s) are placed in the event group's wait
  * queue. An event group is a very suitable synchronization object for cases
@@ -67,28 +67,28 @@
  * we lost the main goal of the preemptive kernel when we use polling services
  * like that.
  *
- * TNeo offers a solution: an event group can be connected to other
+ * KERNEL offers a solution: an event group can be connected to other
  * kernel objects, and these objects will maintain certain flags inside that
  * event group automatically.
  *
  * So, in case of multiple queues, we can act as follows (assume we have two
  * queues: Q1 and Q2) :
- * 
+ *
  * - create event group EG;
  * - connect EG with flag 1 to Q1;
  * - connect EG with flag 2 to Q2;
  * - when task needs to receive a message from either Q1 or Q2, it just waits
- *   for the any of flags 1 or 2 in the EG, this is done in the single call 
- *   to `tn_eventgrp_wait()`.
+ *   for the any of flags 1 or 2 in the EG, this is done in the single call
+ *   to `kernel_eventgrp_wait()`.
  * - when that event happened, task checks which flag is set, and receive
  *   message from the appropriate queue.
  *
  * Please note that task waiting for the event should **not** clear the flag
  * manually: this flag is maintained completely by the queue. If the queue is
  * non-empty, the flag is set. If the queue becomes empty, the flag is cleared.
- * 
- * For the information on system services related to queue, refer to the \ref 
- * tn_dqueue.h "queue reference".
+ *
+ * For the information on system services related to queue, refer to the \ref
+ * kernel_dqueue.h "queue reference".
  *
  * There is an example project available that demonstrates event group
  * connection technique: `examples/queue_eventgrp_conn`. Be sure to examine the
@@ -96,16 +96,16 @@
  *
  */
 
-#ifndef _TN_EVENTGRP_H
-#define _TN_EVENTGRP_H
+#ifndef _KERNEL_EVENTGRP_H
+#define _KERNEL_EVENTGRP_H
 
 /*******************************************************************************
  *    INCLUDED FILES
  ******************************************************************************/
 
-#include "tn_list.h"
-#include "tn_common.h"
-#include "tn_sys.h"
+#include "kernel_list.h"
+#include "kernel_common.h"
+#include "kernel_sys.h"
 
 
 
@@ -118,90 +118,90 @@ extern "C"  {     /*}*/
  ******************************************************************************/
 
 /**
- * Events waiting mode that should be given to `#tn_eventgrp_wait()` and
+ * Events waiting mode that should be given to `#kernel_eventgrp_wait()` and
  * friends.
  */
-enum TN_EGrpWaitMode {
+enum KERNEL_EGrpWaitMode {
    ///
-   /// Task waits for **any** of the event bits from the `wait_pattern` 
+   /// Task waits for **any** of the event bits from the `wait_pattern`
    /// to be set in the event group.
-   /// This flag is mutually exclusive with `#TN_EVENTGRP_WMODE_AND`.
-   TN_EVENTGRP_WMODE_OR       = (1 << 0),
+   /// This flag is mutually exclusive with `#KERNEL_EVENTGRP_WMODE_AND`.
+   KERNEL_EVENTGRP_WMODE_OR       = (1 << 0),
    ///
-   /// Task waits for **all** of the event bits from the `wait_pattern` 
+   /// Task waits for **all** of the event bits from the `wait_pattern`
    /// to be set in the event group.
-   /// This flag is mutually exclusive with `#TN_EVENTGRP_WMODE_OR`.
-   TN_EVENTGRP_WMODE_AND      = (1 << 1),
+   /// This flag is mutually exclusive with `#KERNEL_EVENTGRP_WMODE_OR`.
+   KERNEL_EVENTGRP_WMODE_AND      = (1 << 1),
    ///
    /// When a task <b>successfully</b> ends waiting for event bit(s), these
    /// bits get cleared atomically and automatically. Other bits stay
    /// unchanged.
-   TN_EVENTGRP_WMODE_AUTOCLR  = (1 << 2),
+   KERNEL_EVENTGRP_WMODE_AUTOCLR  = (1 << 2),
 };
 
 /**
- * Modify operation: set, clear or toggle. To be used in `tn_eventgrp_modify()`
- * / `tn_eventgrp_imodify()` functions.
+ * Modify operation: set, clear or toggle. To be used in `kernel_eventgrp_modify()`
+ * / `kernel_eventgrp_imodify()` functions.
  */
-enum TN_EGrpOp {
+enum KERNEL_EGrpOp {
    ///
    /// Set flags that are set in given `pattern` argument. Note that this
-   /// operation can lead to the context switch, since other high-priority 
+   /// operation can lead to the context switch, since other high-priority
    /// task(s) might wait for the event.
-   TN_EVENTGRP_OP_SET,
+   KERNEL_EVENTGRP_OP_SET,
    ///
    /// Clear flags that are set in the given `pattern` argument.
-   /// This operation can **not** lead to the context switch, 
+   /// This operation can **not** lead to the context switch,
    /// since tasks can't wait for events to be cleared.
-   TN_EVENTGRP_OP_CLEAR,
+   KERNEL_EVENTGRP_OP_CLEAR,
    ///
    /// Toggle flags that are set in the given `pattern` argument. Note that this
-   /// operation can lead to the context switch, since other high-priority 
+   /// operation can lead to the context switch, since other high-priority
    /// task(s) might wait for the event that was just set (if any).
-   TN_EVENTGRP_OP_TOGGLE,
+   KERNEL_EVENTGRP_OP_TOGGLE,
 };
 
 
 /**
  * Attributes that could be given to the event group object.
  *
- * Makes sense if only `#TN_OLD_EVENT_API` option is non-zero; otherwise,
- * there's just one dummy attribute available: `#TN_EVENTGRP_ATTR_NONE`.
+ * Makes sense if only `#KERNEL_OLD_EVENT_API` option is non-zero; otherwise,
+ * there's just one dummy attribute available: `#KERNEL_EVENTGRP_ATTR_NONE`.
  */
-enum TN_EGrpAttr {
-#if TN_OLD_EVENT_API || defined(DOXYGEN_ACTIVE)
-   /// \attention deprecated. Available if only `#TN_OLD_EVENT_API` option is
+enum KERNEL_EGrpAttr {
+#if KERNEL_OLD_EVENT_API || defined(DOXYGEN_ACTIVE)
+   /// \attention deprecated. Available if only `#KERNEL_OLD_EVENT_API` option is
    /// non-zero.
    ///
    /// Indicates that only one task could wait for events in this event group.
-   /// This flag is mutually exclusive with `#TN_EVENTGRP_ATTR_MULTI` flag.
-   TN_EVENTGRP_ATTR_SINGLE    = (1 << 0),
+   /// This flag is mutually exclusive with `#KERNEL_EVENTGRP_ATTR_MULTI` flag.
+   KERNEL_EVENTGRP_ATTR_SINGLE    = (1 << 0),
    ///
-   /// \attention deprecated. Available if only `#TN_OLD_EVENT_API` option is
+   /// \attention deprecated. Available if only `#KERNEL_OLD_EVENT_API` option is
    /// non-zero.
    ///
    /// Indicates that multiple tasks could wait for events in this event group.
-   /// This flag is mutually exclusive with `#TN_EVENTGRP_ATTR_SINGLE` flag.
-   TN_EVENTGRP_ATTR_MULTI     = (1 << 1),
+   /// This flag is mutually exclusive with `#KERNEL_EVENTGRP_ATTR_SINGLE` flag.
+   KERNEL_EVENTGRP_ATTR_MULTI     = (1 << 1),
    ///
-   /// \attention strongly deprecated. Available if only `#TN_OLD_EVENT_API`
-   /// option is non-zero. Use `#TN_EVENTGRP_WMODE_AUTOCLR` instead.
+   /// \attention strongly deprecated. Available if only `#KERNEL_OLD_EVENT_API`
+   /// option is non-zero. Use `#KERNEL_EVENTGRP_WMODE_AUTOCLR` instead.
    ///
-   /// Can be specified only in conjunction with `#TN_EVENTGRP_ATTR_SINGLE`
+   /// Can be specified only in conjunction with `#KERNEL_EVENTGRP_ATTR_SINGLE`
    /// flag. Indicates that <b>ALL</b> flags in this event group should be
    /// cleared when task successfully waits for any event in it.
    ///
    /// This actually makes little sense to clear ALL events, but this is what
-   /// compatibility mode is for (see `#TN_OLD_EVENT_API`)
-   TN_EVENTGRP_ATTR_CLR       = (1 << 2),
+   /// compatibility mode is for (see `#KERNEL_OLD_EVENT_API`)
+   KERNEL_EVENTGRP_ATTR_CLR       = (1 << 2),
 #endif
 
-#if !TN_OLD_EVENT_API || defined(DOXYGEN_ACTIVE)
+#if !KERNEL_OLD_EVENT_API || defined(DOXYGEN_ACTIVE)
    ///
    /// Dummy attribute that does not change anything. It is needed only for
    /// the assistance of the events compatibility mode (see
-   /// `#TN_OLD_EVENT_API`)
-   TN_EVENTGRP_ATTR_NONE      = (0),
+   /// `#KERNEL_OLD_EVENT_API`)
+   KERNEL_EVENTGRP_ATTR_NONE      = (0),
 #endif
 };
 
@@ -209,55 +209,55 @@ enum TN_EGrpAttr {
 /**
  * Event group
  */
-struct TN_EventGrp {
+struct KERNEL_EventGrp {
    ///
    /// id for object validity verification.
    /// This field is in the beginning of the structure to make it easier
    /// to detect memory corruption.
-   enum TN_ObjId        id_event;
+   enum KERNEL_ObjId        id_event;
    ///
    /// task wait queue
-   struct TN_ListItem   wait_queue;
+   struct KERNEL_ListItem   wait_queue;
    ///
    /// current flags pattern
-   TN_UWord             pattern;
+   KERNEL_UWord             pattern;
 
-#if TN_OLD_EVENT_API || defined(DOXYGEN_ACTIVE)
+#if KERNEL_OLD_EVENT_API || defined(DOXYGEN_ACTIVE)
    ///
    /// Attributes that are given to that events group,
-   /// available if only `#TN_OLD_EVENT_API` option is non-zero.
-   enum TN_EGrpAttr     attr;
+   /// available if only `#KERNEL_OLD_EVENT_API` option is non-zero.
+   enum KERNEL_EGrpAttr     attr;
 #endif
 
 };
 
 /**
  * EventGrp-specific fields related to waiting task,
- * to be included in struct TN_Task.
+ * to be included in struct KERNEL_Task.
  */
-struct TN_EGrpTaskWait {
+struct KERNEL_EGrpTaskWait {
    ///
-   /// event wait pattern 
-   TN_UWord wait_pattern;
+   /// event wait pattern
+   KERNEL_UWord wait_pattern;
    ///
    /// event wait mode: `AND` or `OR`
-   enum TN_EGrpWaitMode wait_mode;
+   enum KERNEL_EGrpWaitMode wait_mode;
    ///
    /// pattern that caused task to finish waiting
-   TN_UWord actual_pattern;
+   KERNEL_UWord actual_pattern;
 };
 
 /**
- * A link to event group: used when event group can be connected to 
+ * A link to event group: used when event group can be connected to
  * some kernel object, such as queue.
  */
-struct TN_EGrpLink {
+struct KERNEL_EGrpLink {
    ///
    /// event group whose event(s) should be managed by other kernel object
-   struct TN_EventGrp *eventgrp;
+   struct KERNEL_EventGrp *eventgrp;
    ///
    /// event pattern to manage
-   TN_UWord pattern;
+   KERNEL_UWord pattern;
 };
 
 
@@ -276,52 +276,52 @@ struct TN_EGrpLink {
  ******************************************************************************/
 
 /**
- * The same as `#tn_eventgrp_create()`, but takes additional argument: `attr`.
- * It makes sense if only `#TN_OLD_EVENT_API` option is non-zero.
+ * The same as `#kernel_eventgrp_create()`, but takes additional argument: `attr`.
+ * It makes sense if only `#KERNEL_OLD_EVENT_API` option is non-zero.
  *
  * @param eventgrp
- *    Pointer to already allocated struct TN_EventGrp
- * @param attr    
+ *    Pointer to already allocated struct KERNEL_EventGrp
+ * @param attr
  *    Attributes for that particular event group object, see `struct
- *    #TN_EGrpAttr`
+ *    #KERNEL_EGrpAttr`
  * @param initial_pattern
  *    Initial events pattern.
  */
-enum TN_RCode tn_eventgrp_create_wattr(
-      struct TN_EventGrp  *eventgrp,
-      enum TN_EGrpAttr     attr,
-      TN_UWord             initial_pattern
+enum KERNEL_RCode kernel_eventgrp_create_wattr(
+      struct KERNEL_EventGrp  *eventgrp,
+      enum KERNEL_EGrpAttr     attr,
+      KERNEL_UWord             initial_pattern
       );
 
 /**
- * Construct event group. `id_event` field should not contain `#TN_ID_EVENTGRP`,
- * otherwise, `#TN_RC_WPARAM` is returned.
+ * Construct event group. `id_event` field should not contain `#KERNEL_ID_EVENTGRP`,
+ * otherwise, `#KERNEL_RC_WPARAM` is returned.
  *
- * $(TN_CALL_FROM_TASK)
- * $(TN_CALL_FROM_ISR)
- * $(TN_LEGEND_LINK)
+ * $(KERNEL_CALL_FROM_TASK)
+ * $(KERNEL_CALL_FROM_ISR)
+ * $(KERNEL_LEGEND_LINK)
  *
  * @param eventgrp
- *    Pointer to already allocated struct TN_EventGrp
+ *    Pointer to already allocated struct KERNEL_EventGrp
  * @param initial_pattern
  *    Initial events pattern.
  *
- * @return 
- *    * `#TN_RC_OK` if event group was successfully created;
- *    * If `#TN_CHECK_PARAM` is non-zero, additional return code
- *      is available: `#TN_RC_WPARAM`.
+ * @return
+ *    * `#KERNEL_RC_OK` if event group was successfully created;
+ *    * If `#KERNEL_CHECK_PARAM` is non-zero, additional return code
+ *      is available: `#KERNEL_RC_WPARAM`.
  */
-_TN_STATIC_INLINE enum TN_RCode tn_eventgrp_create(
-      struct TN_EventGrp  *eventgrp,
-      TN_UWord             initial_pattern
+_KERNEL_STATIC_INLINE enum KERNEL_RCode kernel_eventgrp_create(
+      struct KERNEL_EventGrp  *eventgrp,
+      KERNEL_UWord             initial_pattern
       )
 {
-   return tn_eventgrp_create_wattr(
+   return kernel_eventgrp_create_wattr(
          eventgrp,
-#if TN_OLD_EVENT_API
-         (TN_EVENTGRP_ATTR_MULTI),
+#if KERNEL_OLD_EVENT_API
+         (KERNEL_EVENTGRP_ATTR_MULTI),
 #else
-         (TN_EVENTGRP_ATTR_NONE),
+         (KERNEL_EVENTGRP_ATTR_NONE),
 #endif
          initial_pattern
          );
@@ -329,33 +329,33 @@ _TN_STATIC_INLINE enum TN_RCode tn_eventgrp_create(
 
 /**
  * Destruct event group.
- * 
- * All tasks that wait for the event(s) become runnable with `#TN_RC_DELETED`
+ *
+ * All tasks that wait for the event(s) become runnable with `#KERNEL_RC_DELETED`
  * code returned.
  *
- * $(TN_CALL_FROM_TASK)
- * $(TN_CAN_SWITCH_CONTEXT)
- * $(TN_LEGEND_LINK)
+ * $(KERNEL_CALL_FROM_TASK)
+ * $(KERNEL_CAN_SWITCH_CONTEXT)
+ * $(KERNEL_LEGEND_LINK)
  *
  * @param eventgrp   Pointer to event groupt to be deleted.
  *
- * @return 
- *    * `#TN_RC_OK` if event group was successfully deleted;
- *    * `#TN_RC_WCONTEXT` if called from wrong context;
- *    * If `#TN_CHECK_PARAM` is non-zero, additional return codes
- *      are available: `#TN_RC_WPARAM` and `#TN_RC_INVALID_OBJ`.
+ * @return
+ *    * `#KERNEL_RC_OK` if event group was successfully deleted;
+ *    * `#KERNEL_RC_WCONTEXT` if called from wrong context;
+ *    * If `#KERNEL_CHECK_PARAM` is non-zero, additional return codes
+ *      are available: `#KERNEL_RC_WPARAM` and `#KERNEL_RC_INVALID_OBJ`.
  */
-enum TN_RCode tn_eventgrp_delete(struct TN_EventGrp *eventgrp);
+enum KERNEL_RCode kernel_eventgrp_delete(struct KERNEL_EventGrp *eventgrp);
 
 /**
  * Wait for specified event(s) in the event group. If the specified event
- * is already active, function returns `#TN_RC_OK` immediately. Otherwise,
- * behavior depends on `timeout` value: refer to `#TN_TickCnt`.
+ * is already active, function returns `#KERNEL_RC_OK` immediately. Otherwise,
+ * behavior depends on `timeout` value: refer to `#KERNEL_TickCnt`.
  *
- * $(TN_CALL_FROM_TASK)
- * $(TN_CAN_SWITCH_CONTEXT)
- * $(TN_CAN_SLEEP)
- * $(TN_LEGEND_LINK)
+ * $(KERNEL_CALL_FROM_TASK)
+ * $(KERNEL_CAN_SWITCH_CONTEXT)
+ * $(KERNEL_CAN_SLEEP)
+ * $(KERNEL_LEGEND_LINK)
  *
  * @param eventgrp
  *    Pointer to event group to wait events from
@@ -363,99 +363,99 @@ enum TN_RCode tn_eventgrp_delete(struct TN_EventGrp *eventgrp);
  *    Events bit pattern for which task should wait
  * @param wait_mode
  *    Specifies whether task should wait for **all** the event bits from
- *    `wait_pattern` to be set, or for just **any** of them 
- *    (see enum `#TN_EGrpWaitMode`)
+ *    `wait_pattern` to be set, or for just **any** of them
+ *    (see enum `#KERNEL_EGrpWaitMode`)
  * @param p_flags_pattern
- *    Pointer to the `TN_UWord` variable in which actual event pattern
+ *    Pointer to the `KERNEL_UWord` variable in which actual event pattern
  *    that caused task to stop waiting will be stored.
- *    May be `TN_NULL`.
+ *    May be `KERNEL_NULL`.
  * @param timeout
- *    refer to `#TN_TickCnt`
+ *    refer to `#KERNEL_TickCnt`
  *
  * @return
- *    * `#TN_RC_OK` if specified event is active (so the task can check 
- *      variable pointed to by `p_flags_pattern` if it wasn't `TN_NULL`).
- *    * `#TN_RC_WCONTEXT` if called from wrong context;
+ *    * `#KERNEL_RC_OK` if specified event is active (so the task can check
+ *      variable pointed to by `p_flags_pattern` if it wasn't `KERNEL_NULL`).
+ *    * `#KERNEL_RC_WCONTEXT` if called from wrong context;
  *    * Other possible return codes depend on `timeout` value,
- *      refer to `#TN_TickCnt`
- *    * If `#TN_CHECK_PARAM` is non-zero, additional return codes
- *      are available: `#TN_RC_WPARAM` and `#TN_RC_INVALID_OBJ`.
+ *      refer to `#KERNEL_TickCnt`
+ *    * If `#KERNEL_CHECK_PARAM` is non-zero, additional return codes
+ *      are available: `#KERNEL_RC_WPARAM` and `#KERNEL_RC_INVALID_OBJ`.
  */
-enum TN_RCode tn_eventgrp_wait(
-      struct TN_EventGrp  *eventgrp,
-      TN_UWord             wait_pattern,
-      enum TN_EGrpWaitMode wait_mode,
-      TN_UWord            *p_flags_pattern,
-      TN_TickCnt           timeout
+enum KERNEL_RCode kernel_eventgrp_wait(
+      struct KERNEL_EventGrp  *eventgrp,
+      KERNEL_UWord             wait_pattern,
+      enum KERNEL_EGrpWaitMode wait_mode,
+      KERNEL_UWord            *p_flags_pattern,
+      KERNEL_TickCnt           timeout
       );
 
 /**
- * The same as `tn_eventgrp_wait()` with zero timeout.
+ * The same as `kernel_eventgrp_wait()` with zero timeout.
  *
- * $(TN_CALL_FROM_TASK)
- * $(TN_CAN_SWITCH_CONTEXT)
- * $(TN_LEGEND_LINK)
+ * $(KERNEL_CALL_FROM_TASK)
+ * $(KERNEL_CAN_SWITCH_CONTEXT)
+ * $(KERNEL_LEGEND_LINK)
  */
-enum TN_RCode tn_eventgrp_wait_polling(
-      struct TN_EventGrp  *eventgrp,
-      TN_UWord             wait_pattern,
-      enum TN_EGrpWaitMode wait_mode,
-      TN_UWord            *p_flags_pattern
+enum KERNEL_RCode kernel_eventgrp_wait_polling(
+      struct KERNEL_EventGrp  *eventgrp,
+      KERNEL_UWord             wait_pattern,
+      enum KERNEL_EGrpWaitMode wait_mode,
+      KERNEL_UWord            *p_flags_pattern
       );
 
 /**
- * The same as `tn_eventgrp_wait()` with zero timeout, but for using in the ISR.
+ * The same as `kernel_eventgrp_wait()` with zero timeout, but for using in the ISR.
  *
- * $(TN_CALL_FROM_ISR)
- * $(TN_CAN_SWITCH_CONTEXT)
- * $(TN_LEGEND_LINK)
+ * $(KERNEL_CALL_FROM_ISR)
+ * $(KERNEL_CAN_SWITCH_CONTEXT)
+ * $(KERNEL_LEGEND_LINK)
  */
-enum TN_RCode tn_eventgrp_iwait_polling(
-      struct TN_EventGrp  *eventgrp,
-      TN_UWord             wait_pattern,
-      enum TN_EGrpWaitMode wait_mode,
-      TN_UWord            *p_flags_pattern
+enum KERNEL_RCode kernel_eventgrp_iwait_polling(
+      struct KERNEL_EventGrp  *eventgrp,
+      KERNEL_UWord             wait_pattern,
+      enum KERNEL_EGrpWaitMode wait_mode,
+      KERNEL_UWord            *p_flags_pattern
       );
 
 /**
  * Modify current events bit pattern in the event group. Behavior depends
- * on the given `operation`: refer to `enum #TN_EGrpOp`
+ * on the given `operation`: refer to `enum #KERNEL_EGrpOp`
  *
- * $(TN_CALL_FROM_TASK)
- * $(TN_CAN_SWITCH_CONTEXT)
- * $(TN_LEGEND_LINK)
+ * $(KERNEL_CALL_FROM_TASK)
+ * $(KERNEL_CAN_SWITCH_CONTEXT)
+ * $(KERNEL_LEGEND_LINK)
  *
  * @param eventgrp
  *    Pointer to event group to modify events in
  * @param operation
  *    Actual operation to perform: set, clear or toggle.
- *    Refer to `enum #TN_EGrpOp`
+ *    Refer to `enum #KERNEL_EGrpOp`
  * @param pattern
  *    Events pattern to be applied (depending on `operation` value)
  *
  * @return
- *    * `#TN_RC_OK` on success;
- *    * `#TN_RC_WCONTEXT` if called from wrong context;
- *    * If `#TN_CHECK_PARAM` is non-zero, additional return codes
- *      are available: `#TN_RC_WPARAM` and `#TN_RC_INVALID_OBJ`.
+ *    * `#KERNEL_RC_OK` on success;
+ *    * `#KERNEL_RC_WCONTEXT` if called from wrong context;
+ *    * If `#KERNEL_CHECK_PARAM` is non-zero, additional return codes
+ *      are available: `#KERNEL_RC_WPARAM` and `#KERNEL_RC_INVALID_OBJ`.
  */
-enum TN_RCode tn_eventgrp_modify(
-      struct TN_EventGrp  *eventgrp,
-      enum TN_EGrpOp       operation,
-      TN_UWord             pattern
+enum KERNEL_RCode kernel_eventgrp_modify(
+      struct KERNEL_EventGrp  *eventgrp,
+      enum KERNEL_EGrpOp       operation,
+      KERNEL_UWord             pattern
       );
 
 /**
- * The same as `tn_eventgrp_modify()`, but for using in the ISR.
+ * The same as `kernel_eventgrp_modify()`, but for using in the ISR.
  *
- * $(TN_CALL_FROM_ISR)
- * $(TN_CAN_SWITCH_CONTEXT)
- * $(TN_LEGEND_LINK)
+ * $(KERNEL_CALL_FROM_ISR)
+ * $(KERNEL_CAN_SWITCH_CONTEXT)
+ * $(KERNEL_LEGEND_LINK)
  */
-enum TN_RCode tn_eventgrp_imodify(
-      struct TN_EventGrp  *eventgrp,
-      enum TN_EGrpOp       operation,
-      TN_UWord             pattern
+enum KERNEL_RCode kernel_eventgrp_imodify(
+      struct KERNEL_EventGrp  *eventgrp,
+      enum KERNEL_EGrpOp       operation,
+      KERNEL_UWord             pattern
       );
 
 
@@ -463,7 +463,7 @@ enum TN_RCode tn_eventgrp_imodify(
 }  /* extern "C" */
 #endif
 
-#endif // _TN_EVENTGRP_H
+#endif // _KERNEL_EVENTGRP_H
 
 /*******************************************************************************
  *    end of file

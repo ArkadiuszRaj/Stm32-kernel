@@ -3,25 +3,25 @@ BIN_DIRS=bin _obj
 
 .PHONY: all
 all:
-	make TN_ARCH=cortex_m0 TN_COMPILER=arm-none-eabi-gcc
-	make TN_ARCH=cortex_m0plus TN_COMPILER=arm-none-eabi-gcc
-	make TN_ARCH=cortex_m1 TN_COMPILER=arm-none-eabi-gcc
-	make TN_ARCH=cortex_m3 TN_COMPILER=arm-none-eabi-gcc
-	make TN_ARCH=cortex_m4 TN_COMPILER=arm-none-eabi-gcc
-	make TN_ARCH=cortex_m4f TN_COMPILER=arm-none-eabi-gcc
-	make TN_ARCH=cortex_m0 TN_COMPILER=clang
-	make TN_ARCH=cortex_m3 TN_COMPILER=clang
-	make TN_ARCH=cortex_m4 TN_COMPILER=clang
-	make TN_ARCH=pic32mx TN_COMPILER=xc32
-	make TN_ARCH=pic24_dspic_eds TN_COMPILER=xc16
-	make TN_ARCH=pic24_dspic_noeds TN_COMPILER=xc16
+	make KERNEL_ARCH=cortex_m0 KERNEL_COMPILER=arm-none-eabi-gcc
+	make KERNEL_ARCH=cortex_m0plus KERNEL_COMPILER=arm-none-eabi-gcc
+	make KERNEL_ARCH=cortex_m1 KERNEL_COMPILER=arm-none-eabi-gcc
+	make KERNEL_ARCH=cortex_m3 KERNEL_COMPILER=arm-none-eabi-gcc
+	make KERNEL_ARCH=cortex_m4 KERNEL_COMPILER=arm-none-eabi-gcc
+	make KERNEL_ARCH=cortex_m4f KERNEL_COMPILER=arm-none-eabi-gcc
+	make KERNEL_ARCH=cortex_m0 KERNEL_COMPILER=clang
+	make KERNEL_ARCH=cortex_m3 KERNEL_COMPILER=clang
+	make KERNEL_ARCH=cortex_m4 KERNEL_COMPILER=clang
+	make KERNEL_ARCH=pic32mx KERNEL_COMPILER=xc32
+	make KERNEL_ARCH=pic24_dspic_eds KERNEL_COMPILER=xc16
+	make KERNEL_ARCH=pic24_dspic_noeds KERNEL_COMPILER=xc16
 
 
 # for some reason, clang complains about unknown targets.
 
-	#make TN_ARCH=cortex_m0plus TN_COMPILER=clang
-	#make TN_ARCH=cortex_m1 TN_COMPILER=clang
-	#make TN_ARCH=cortex_m4f TN_COMPILER=clang
+	#make KERNEL_ARCH=cortex_m0plus KERNEL_COMPILER=clang
+	#make KERNEL_ARCH=cortex_m1 KERNEL_COMPILER=clang
+	#make KERNEL_ARCH=cortex_m4f KERNEL_COMPILER=clang
 
 .PHONY: clean
 

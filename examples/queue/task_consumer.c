@@ -1,7 +1,7 @@
 /**
  * \file
  *
- * Example project that demonstrates usage of queues in TNeo.
+ * Example project that demonstrates usage of queues in KERNEL.
  */
 
 /*******************************************************************************
@@ -11,17 +11,17 @@
 #include "task_consumer.h"
 #include "task_producer.h"
 #include "queue_example.h"
-#include "tn.h"
+#include "kernel.h"
 
 /*******************************************************************************
  *    DEFINITIONS
  ******************************************************************************/
 
 //-- task stack size
-#define  TASK_CONSUMER_STACK_SIZE      (TN_MIN_STACK_SIZE + 96)
+#define  TASK_CONSUMER_STACK_SIZE      (KERNEL_MIN_STACK_SIZE + 96)
 
 //-- priority of consumer task: the highest one
-#define  TASK_CONSUMER_PRIORITY        0 
+#define  TASK_CONSUMER_PRIORITY        0
 
 //-- number of items in the consumer message queue
 #define  CONS_QUE_BUF_SIZE    4
@@ -58,18 +58,18 @@ struct TaskConsumerMsg {
  ******************************************************************************/
 
 //-- define array for task stack
-TN_STACK_ARR_DEF(task_consumer_stack, TASK_CONSUMER_STACK_SIZE);
+KERNEL_STACK_ARR_DEF(task_consumer_stack, TASK_CONSUMER_STACK_SIZE);
 
 //-- task descriptor: it's better to explicitly zero it
-static struct TN_Task task_consumer = {};
+static struct KERNEL_Task task_consumer = {};
 
 //-- define queue and buffer for it
-struct TN_DQueue     cons_que;
+struct KERNEL_DQueue     cons_que;
 void                *cons_que_buf[ CONS_QUE_BUF_SIZE ];
 
 //-- define fixed memory pool and buffer for it
-struct TN_FMem       cons_fmem;
-TN_FMEM_BUF_DEF(cons_fmem_buf, struct TaskConsumerMsg, CONS_QUE_BUF_SIZE);
+struct KERNEL_FMem       cons_fmem;
+KERNEL_FMEM_BUF_DEF(cons_fmem_buf, struct TaskConsumerMsg, CONS_QUE_BUF_SIZE);
 
 
 
@@ -95,24 +95,24 @@ static void task_consumer_body(void *par)
 
    //-- create memory pool
    SYSRETVAL_CHECK(
-         tn_fmem_create(
+         kernel_fmem_create(
             &cons_fmem,
             cons_fmem_buf,
-            TN_MAKE_ALIG_SIZE(sizeof(struct TaskConsumerMsg)),
+            KERNEL_MAKE_ALIG_SIZE(sizeof(struct TaskConsumerMsg)),
             CONS_QUE_BUF_SIZE
             )
          );
 
    //-- create queue
    SYSRETVAL_CHECK(
-         tn_queue_create(&cons_que, (void *)cons_que_buf, CONS_QUE_BUF_SIZE)
+         kernel_queue_create(&cons_que, (void *)cons_que_buf, CONS_QUE_BUF_SIZE)
          );
 
    //-- cry that consumer task has initialized
    SYSRETVAL_CHECK(
-         tn_eventgrp_modify(
+         kernel_eventgrp_modify(
             queue_example_eventgrp_get(),
-            TN_EVENTGRP_OP_SET,
+            KERNEL_EVENTGRP_OP_SET,
             QUE_EXAMPLE_FLAG__TASK_CONSUMER_INIT
             )
          );
@@ -125,11 +125,11 @@ static void task_consumer_body(void *par)
    {
       //-- wait for message, potentially can wait forever
       //   (if there are no messages)
-      enum TN_RCode rc = SYSRETVAL_CHECK(
-            tn_queue_receive(&cons_que, (void *)&p_msg, TN_WAIT_INFINITE)
+      enum KERNEL_RCode rc = SYSRETVAL_CHECK(
+            kernel_queue_receive(&cons_que, (void *)&p_msg, KERNEL_WAIT_INFINITE)
             );
 
-      if (rc == TN_RC_OK){
+      if (rc == KERNEL_RC_OK){
 
          //-- message successfully received, let's check command
          switch (p_msg->cmd){
@@ -146,7 +146,7 @@ static void task_consumer_body(void *par)
          }
 
          //-- free memory
-         SYSRETVAL_CHECK(tn_fmem_release(&cons_fmem, (void *)p_msg));
+         SYSRETVAL_CHECK(kernel_fmem_release(&cons_fmem, (void *)p_msg));
       }
 
    }
@@ -168,14 +168,14 @@ void task_consumer_create(void)
 {
 
    SYSRETVAL_CHECK(
-         tn_task_create(
+         kernel_task_create(
             &task_consumer,
             task_consumer_body,
             TASK_CONSUMER_PRIORITY,
             task_consumer_stack,
             TASK_CONSUMER_STACK_SIZE,
-            TN_NULL,
-            (TN_TASK_CREATE_OPT_START)
+            KERNEL_NULL,
+            (KERNEL_TASK_CREATE_OPT_START)
             )
          );
 
@@ -189,29 +189,29 @@ int task_consumer_msg_send(enum E_TaskConsCmd cmd, enum E_TaskConsPin pin_num)
    int ret = 0;
 
    struct TaskConsumerMsg *p_msg;
-   enum TN_RCode tn_rc;
+   enum KERNEL_RCode kernel_rc;
 
    //-- get memory block from memory pool
-   tn_rc = SYSRETVAL_CHECK_TO(
-         tn_fmem_get(&cons_fmem, (void *)&p_msg, WAIT_TIMEOUT)
+   kernel_rc = SYSRETVAL_CHECK_TO(
+         kernel_fmem_get(&cons_fmem, (void *)&p_msg, WAIT_TIMEOUT)
          );
-   if (tn_rc == TN_RC_OK){
+   if (kernel_rc == KERNEL_RC_OK){
 
       //-- put correct data to the allocated memory
       p_msg->cmd     = cmd;
       p_msg->pin_num = pin_num;
 
       //-- send it to the consumer task
-      tn_rc = SYSRETVAL_CHECK_TO(
-            tn_queue_send(&cons_que, (void *)p_msg, WAIT_TIMEOUT)
+      kernel_rc = SYSRETVAL_CHECK_TO(
+            kernel_queue_send(&cons_que, (void *)p_msg, WAIT_TIMEOUT)
             );
 
-      if (tn_rc == TN_RC_OK){
+      if (kernel_rc == KERNEL_RC_OK){
          ret = 1/*success*/;
       } else {
          //-- there was some error while sending the message,
          //   so, we should free buffer that we've allocated
-         SYSRETVAL_CHECK(tn_fmem_release(&cons_fmem, (void *)p_msg));
+         SYSRETVAL_CHECK(kernel_fmem_release(&cons_fmem, (void *)p_msg));
       }
    } else {
       //-- there was some error while allocating memory,

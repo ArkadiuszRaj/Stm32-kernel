@@ -1,18 +1,18 @@
 /*******************************************************************************
  *
- * TNeo: real-time kernel initially based on TNKernel
+ * KERNEL: real-time kernel initially based on KERNELKernel
  *
- *    TNKernel:                  copyright 2004, 2013 Yuri Tiomkin.
+ *    KERNELKernel:                  copyright 2004, 2013 Yuri Tiomkin.
  *    PIC32-specific routines:   copyright 2013, 2014 Anders Montonen.
- *    TNeo:                      copyright 2014       Dmitry Frank.
+ *    KERNEL:                      copyright 2014       Dmitry Frank.
  *
- *    TNeo was born as a thorough review and re-implementation of
- *    TNKernel. The new kernel has well-formed code, inherited bugs are fixed
+ *    KERNEL was born as a thorough review and re-implementation of
+ *    KERNELKernel. The new kernel has well-formed code, inherited bugs are fixed
  *    as well as new features being added, and it is tested carefully with
  *    unit-tests.
  *
- *    API is changed somewhat, so it's not 100% compatible with TNKernel,
- *    hence the new name: TNeo.
+ *    API is changed somewhat, so it's not 100% compatible with KERNELKernel,
+ *    hence the new name: KERNEL.
  *
  *    Permission to use, copy, modify, and distribute this software in source
  *    and binary forms and its documentation for any purpose and without fee
@@ -22,7 +22,7 @@
  *
  *    THIS SOFTWARE IS PROVIDED BY THE DMITRY FRANK AND CONTRIBUTORS "AS IS"
  *    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FIKERNELESS FOR A PARTICULAR
  *    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL DMITRY FRANK OR CONTRIBUTORS BE
  *    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  *    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
@@ -42,16 +42,16 @@
  *
  */
 
-#ifndef  _TN_ARCH_CORTEX_M_H
-#define  _TN_ARCH_CORTEX_M_H
+#ifndef  _KERNEL_ARCH_CORTEX_M_H
+#define  _KERNEL_ARCH_CORTEX_M_H
 
 
 /*******************************************************************************
  *    INCLUDED FILES
  ******************************************************************************/
 
-#include "../tn_arch_detect.h"
-#include "../../core/tn_cfg_dispatch.h"
+#include "../kernel_arch_detect.h"
+#include "../../core/kernel_cfg_dispatch.h"
 
 
 
@@ -73,92 +73,92 @@ extern "C"  {     /*}*/
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-#define  _TN_CORTEX_INTSAVE_DATA_INVALID   0xffffffff
+#define  _KERNEL_CORTEX_INTSAVE_DATA_INVALID   0xffffffff
 
-#if TN_DEBUG
-#  define   _TN_CORTEX_INTSAVE_CHECK()                         \
+#if KERNEL_DEBUG
+#  define   _KERNEL_CORTEX_INTSAVE_CHECK()                         \
 {                                                              \
-   if (TN_INTSAVE_VAR == _TN_CORTEX_INTSAVE_DATA_INVALID){     \
-      _TN_FATAL_ERROR("");                                     \
+   if (KERNEL_INTSAVE_VAR == _KERNEL_CORTEX_INTSAVE_DATA_INVALID){     \
+      _KERNEL_FATAL_ERROR("");                                     \
    }                                                           \
 }
 #else
-#  define   _TN_CORTEX_INTSAVE_CHECK()  /* nothing */
+#  define   _KERNEL_CORTEX_INTSAVE_CHECK()  /* nothing */
 #endif
 
-#if defined(__TN_ARCHFEAT_CORTEX_M_ARMv7M_ISA__)
+#if defined(__KERNEL_ARCHFEAT_CORTEX_M_ARMv7M_ISA__)
 /**
  * FFS - find first set bit. Used in `_find_next_task_to_run()` function.
  * Say, for `0xa8` it should return `3`.
  *
  * May be not defined: in this case, naive algorithm will be used.
  */
-#define  _TN_FFS(x)     ffs_asm(x)
+#define  _KERNEL_FFS(x)     ffs_asm(x)
 int ffs_asm(int x);
 #endif
 
 /**
  * Used by the kernel as a signal that something really bad happened.
- * Indicates TNeo bugs as well as illegal kernel usage
+ * Indicates KERNEL bugs as well as illegal kernel usage
  * (e.g. sleeping in the idle task callback)
  *
  * Typically, set to assembler instruction that causes debugger to halt.
  */
 
-#if defined(__TN_COMPILER_IAR__)
-#  define  _TN_FATAL_ERRORF(error_msg, ...)         \
+#if defined(__KERNEL_COMPILER_IAR__)
+#  define  _KERNEL_FATAL_ERRORF(error_msg, ...)         \
       {asm("bkpt #0");}
 #else
-#  define  _TN_FATAL_ERRORF(error_msg, ...)         \
+#  define  _KERNEL_FATAL_ERRORF(error_msg, ...)         \
       {__asm__ volatile("bkpt #0");}
 #endif
 
 
 
 /**
- * \def TN_ARCH_STK_ATTR_BEFORE
+ * \def KERNEL_ARCH_STK_ATTR_BEFORE
  *
  * Compiler-specific attribute that should be placed **before** declaration of
- * array used for stack. It is needed because there are often additional 
+ * array used for stack. It is needed because there are often additional
  * restrictions applied to alignment of stack, so, to meet them, stack arrays
  * need to be declared with these macros.
  *
- * @see TN_ARCH_STK_ATTR_AFTER
+ * @see KERNEL_ARCH_STK_ATTR_AFTER
  */
 
 /**
- * \def TN_ARCH_STK_ATTR_AFTER
+ * \def KERNEL_ARCH_STK_ATTR_AFTER
  *
  * Compiler-specific attribute that should be placed **after** declaration of
- * array used for stack. It is needed because there are often additional 
+ * array used for stack. It is needed because there are often additional
  * restrictions applied to alignment of stack, so, to meet them, stack arrays
  * need to be declared with these macros.
  *
- * @see TN_ARCH_STK_ATTR_BEFORE
+ * @see KERNEL_ARCH_STK_ATTR_BEFORE
  */
 
-#if defined(__TN_COMPILER_ARMCC__)
+#if defined(__KERNEL_COMPILER_ARMCC__)
 
-#  define TN_ARCH_STK_ATTR_BEFORE      __align(8)
-#  define TN_ARCH_STK_ATTR_AFTER
+#  define KERNEL_ARCH_STK_ATTR_BEFORE      __align(8)
+#  define KERNEL_ARCH_STK_ATTR_AFTER
 
-#elif defined(__TN_COMPILER_GCC__) || defined(__TN_COMPILER_CLANG__)
+#elif defined(__KERNEL_COMPILER_GCC__) || defined(__KERNEL_COMPILER_CLANG__)
 
-#  define TN_ARCH_STK_ATTR_BEFORE
-#  define TN_ARCH_STK_ATTR_AFTER       __attribute__((aligned(0x08)))
+#  define KERNEL_ARCH_STK_ATTR_BEFORE
+#  define KERNEL_ARCH_STK_ATTR_AFTER       __attribute__((aligned(0x08)))
 
-#elif defined(__TN_COMPILER_IAR__)
+#elif defined(__KERNEL_COMPILER_IAR__)
 
-#  define TN_ARCH_STK_ATTR_BEFORE
-#  define TN_ARCH_STK_ATTR_AFTER
+#  define KERNEL_ARCH_STK_ATTR_BEFORE
+#  define KERNEL_ARCH_STK_ATTR_AFTER
 
 #endif
 
 
-#if defined(__TN_ARCHFEAT_CORTEX_M_FPU__)
-#  define _TN_CORTEX_FPU_CONTEXT_SIZE 32 /* FPU registers: S0 .. S31 */
+#if defined(__KERNEL_ARCHFEAT_CORTEX_M_FPU__)
+#  define _KERNEL_CORTEX_FPU_CONTEXT_SIZE 32 /* FPU registers: S0 .. S31 */
 #else
-#  define _TN_CORTEX_FPU_CONTEXT_SIZE 0  /* no FPU registers */
+#  define _KERNEL_CORTEX_FPU_CONTEXT_SIZE 0  /* no FPU registers */
 #endif
 
 
@@ -166,183 +166,183 @@ int ffs_asm(int x);
  * Minimum task's stack size, in words, not in bytes; includes a space for
  * context plus for parameters passed to task's body function.
  */
-#define  TN_MIN_STACK_SIZE          (17 /* context: 17 words */   \
-      + _TN_STACK_OVERFLOW_SIZE_ADD                               \
-      + _TN_CORTEX_FPU_CONTEXT_SIZE                               \
+#define  KERNEL_MIN_STACK_SIZE          (17 /* context: 17 words */   \
+      + _KERNEL_STACK_OVERFLOW_SIZE_ADD                               \
+      + _KERNEL_CORTEX_FPU_CONTEXT_SIZE                               \
       )
 
 /**
  * Width of `int` type.
  */
-#define  TN_INT_WIDTH               32
+#define  KERNEL_INT_WIDTH               32
 
 /**
  * Unsigned integer type whose size is equal to the size of CPU register.
  * Typically it's plain `unsigned int`.
  */
-typedef  unsigned int               TN_UWord;
+typedef  unsigned int               KERNEL_UWord;
 
 /**
  * Unsigned integer type that is able to store pointers.
  * We need it because some platforms don't define `uintptr_t`.
  * Typically it's `unsigned int`.
  */
-typedef  unsigned int               TN_UIntPtr;
+typedef  unsigned int               KERNEL_UIntPtr;
 
 /**
  * Maximum number of priorities available, this value usually matches
- * `#TN_INT_WIDTH`.
+ * `#KERNEL_INT_WIDTH`.
  *
- * @see TN_PRIORITIES_CNT
+ * @see KERNEL_PRIORITIES_CNT
  */
-#define  TN_PRIORITIES_MAX_CNT      TN_INT_WIDTH
+#define  KERNEL_PRIORITIES_MAX_CNT      KERNEL_INT_WIDTH
 
 /**
  * Value for infinite waiting, usually matches `ULONG_MAX`,
- * because `#TN_TickCnt` is declared as `unsigned long`.
+ * because `#KERNEL_TickCnt` is declared as `unsigned long`.
  */
-#define  TN_WAIT_INFINITE           (TN_TickCnt)0xFFFFFFFF
+#define  KERNEL_WAIT_INFINITE           (KERNEL_TickCnt)0xFFFFFFFF
 
 /**
  * Value for initializing the task's stack
  */
-#define  TN_FILL_STACK_VAL          0xFEEDFACE
+#define  KERNEL_FILL_STACK_VAL          0xFEEDFACE
 
 
 
 
 /**
  * Variable name that is used for storing interrupts state
- * by macros TN_INTSAVE_DATA and friends
+ * by macros KERNEL_INTSAVE_DATA and friends
  */
-#define TN_INTSAVE_VAR              tn_save_status_reg
+#define KERNEL_INTSAVE_VAR              kernel_save_status_reg
 
 /**
- * Declares variable that is used by macros `TN_INT_DIS_SAVE()` and
- * `TN_INT_RESTORE()` for storing status register value.
+ * Declares variable that is used by macros `KERNEL_INT_DIS_SAVE()` and
+ * `KERNEL_INT_RESTORE()` for storing status register value.
  *
  * It is good idea to initially set it to some invalid value,
- * and if TN_DEBUG is non-zero, check it in TN_INT_RESTORE().
+ * and if KERNEL_DEBUG is non-zero, check it in KERNEL_INT_RESTORE().
  * Then, we can catch bugs if someone tries to restore interrupts status
  * without saving it first.
  *
- * @see `TN_INT_DIS_SAVE()`
- * @see `TN_INT_RESTORE()`
+ * @see `KERNEL_INT_DIS_SAVE()`
+ * @see `KERNEL_INT_RESTORE()`
  */
-#define  TN_INTSAVE_DATA            \
-   TN_UWord TN_INTSAVE_VAR = _TN_CORTEX_INTSAVE_DATA_INVALID;
+#define  KERNEL_INTSAVE_DATA            \
+   KERNEL_UWord KERNEL_INTSAVE_VAR = _KERNEL_CORTEX_INTSAVE_DATA_INVALID;
 
 /**
- * The same as `#TN_INTSAVE_DATA` but for using in ISR together with
- * `TN_INT_IDIS_SAVE()`, `TN_INT_IRESTORE()`.
+ * The same as `#KERNEL_INTSAVE_DATA` but for using in ISR together with
+ * `KERNEL_INT_IDIS_SAVE()`, `KERNEL_INT_IRESTORE()`.
  *
- * @see `TN_INT_IDIS_SAVE()`
- * @see `TN_INT_IRESTORE()`
+ * @see `KERNEL_INT_IDIS_SAVE()`
+ * @see `KERNEL_INT_IRESTORE()`
  */
-#define  TN_INTSAVE_DATA_INT        TN_INTSAVE_DATA
+#define  KERNEL_INTSAVE_DATA_INT        KERNEL_INTSAVE_DATA
 
 /**
- * \def TN_INT_DIS_SAVE()
+ * \def KERNEL_INT_DIS_SAVE()
  *
  * Disable interrupts and return previous value of status register,
- * atomically. Similar `tn_arch_sr_save_int_dis()`, but implemented
+ * atomically. Similar `kernel_arch_sr_save_int_dis()`, but implemented
  * as a macro, so it is potentially faster.
  *
- * Uses `#TN_INTSAVE_DATA` as a temporary storage.
+ * Uses `#KERNEL_INTSAVE_DATA` as a temporary storage.
  *
- * @see `#TN_INTSAVE_DATA`
- * @see `tn_arch_sr_save_int_dis()`
+ * @see `#KERNEL_INTSAVE_DATA`
+ * @see `kernel_arch_sr_save_int_dis()`
  */
 
 /**
- * \def TN_INT_RESTORE()
+ * \def KERNEL_INT_RESTORE()
  *
  * Restore previously saved status register.
- * Similar to `tn_arch_sr_restore()`, but implemented as a macro,
+ * Similar to `kernel_arch_sr_restore()`, but implemented as a macro,
  * so it is potentially faster.
  *
- * Uses `#TN_INTSAVE_DATA` as a temporary storage.
+ * Uses `#KERNEL_INTSAVE_DATA` as a temporary storage.
  *
- * @see `#TN_INTSAVE_DATA`
- * @see `tn_arch_sr_save_int_dis()`
+ * @see `#KERNEL_INTSAVE_DATA`
+ * @see `kernel_arch_sr_save_int_dis()`
  */
 
-#define TN_INT_DIS_SAVE()   TN_INTSAVE_VAR = tn_arch_sr_save_int_dis()
-#define TN_INT_RESTORE()    _TN_CORTEX_INTSAVE_CHECK();                     \
-                            tn_arch_sr_restore(TN_INTSAVE_VAR)
-
-/**
- * The same as `TN_INT_DIS_SAVE()` but for using in ISR.
- *
- * Uses `#TN_INTSAVE_DATA_INT` as a temporary storage.
- *
- * @see `#TN_INTSAVE_DATA_INT`
- */
-#define TN_INT_IDIS_SAVE()       TN_INT_DIS_SAVE()
+#define KERNEL_INT_DIS_SAVE()   KERNEL_INTSAVE_VAR = kernel_arch_sr_save_int_dis()
+#define KERNEL_INT_RESTORE()    _KERNEL_CORTEX_INTSAVE_CHECK();                     \
+                            kernel_arch_sr_restore(KERNEL_INTSAVE_VAR)
 
 /**
- * The same as `TN_INT_RESTORE()` but for using in ISR.
+ * The same as `KERNEL_INT_DIS_SAVE()` but for using in ISR.
  *
- * Uses `#TN_INTSAVE_DATA_INT` as a temporary storage.
+ * Uses `#KERNEL_INTSAVE_DATA_INT` as a temporary storage.
  *
- * @see `#TN_INTSAVE_DATA_INT`
+ * @see `#KERNEL_INTSAVE_DATA_INT`
  */
-#define TN_INT_IRESTORE()        TN_INT_RESTORE()
+#define KERNEL_INT_IDIS_SAVE()       KERNEL_INT_DIS_SAVE()
+
+/**
+ * The same as `KERNEL_INT_RESTORE()` but for using in ISR.
+ *
+ * Uses `#KERNEL_INTSAVE_DATA_INT` as a temporary storage.
+ *
+ * @see `#KERNEL_INTSAVE_DATA_INT`
+ */
+#define KERNEL_INT_IRESTORE()        KERNEL_INT_RESTORE()
 
 /**
  * Returns nonzero if interrupts are disabled, zero otherwise.
  */
-#define TN_IS_INT_DISABLED()     (_tn_arch_is_int_disabled())
+#define KERNEL_IS_INT_DISABLED()     (_kernel_arch_is_int_disabled())
 
 /**
  * Pend context switch from interrupt.
  */
-#define _TN_CONTEXT_SWITCH_IPEND_IF_NEEDED()          \
-   _tn_context_switch_pend_if_needed()
+#define _KERNEL_CONTEXT_SWITCH_IPEND_IF_NEEDED()          \
+   _kernel_context_switch_pend_if_needed()
 
 /**
- * Converts size in bytes to size in `#TN_UWord`.
+ * Converts size in bytes to size in `#KERNEL_UWord`.
  * For 32-bit platforms, we should shift it by 2 bit to the right;
  * for 16-bit platforms, we should shift it by 1 bit to the right.
  */
-#define _TN_SIZE_BYTES_TO_UWORDS(size_in_bytes)    ((size_in_bytes) >> 2)
+#define _KERNEL_SIZE_BYTES_TO_UWORDS(size_in_bytes)    ((size_in_bytes) >> 2)
 
-#if defined(__TN_COMPILER_ARMCC__)
-#  if TN_FORCED_INLINE
-#     define _TN_INLINE             __forceinline
+#if defined(__KERNEL_COMPILER_ARMCC__)
+#  if KERNEL_FORCED_INLINE
+#     define _KERNEL_INLINE             __forceinline
 #  else
-#     define _TN_INLINE             __inline
+#     define _KERNEL_INLINE             __inline
 #  endif
-#  define _TN_STATIC_INLINE         static _TN_INLINE
-#  define _TN_VOLATILE_WORKAROUND   /* nothing */
-#elif defined(__TN_COMPILER_GCC__) || defined(__TN_COMPILER_CLANG__)
-#  if TN_FORCED_INLINE
-#     define _TN_INLINE             inline __attribute__ ((always_inline))
+#  define _KERNEL_STATIC_INLINE         static _KERNEL_INLINE
+#  define _KERNEL_VOLATILE_WORKAROUND   /* nothing */
+#elif defined(__KERNEL_COMPILER_GCC__) || defined(__KERNEL_COMPILER_CLANG__)
+#  if KERNEL_FORCED_INLINE
+#     define _KERNEL_INLINE             inline __attribute__ ((always_inline))
 #  else
-#     define _TN_INLINE             inline
+#     define _KERNEL_INLINE             inline
 #  endif
-#  define _TN_STATIC_INLINE         static _TN_INLINE
-#  define _TN_VOLATILE_WORKAROUND   /* nothing */
-#elif defined(__TN_COMPILER_IAR__)
-#  if TN_FORCED_INLINE
-#     define _TN_INLINE             _Pragma("inline=forced")
+#  define _KERNEL_STATIC_INLINE         static _KERNEL_INLINE
+#  define _KERNEL_VOLATILE_WORKAROUND   /* nothing */
+#elif defined(__KERNEL_COMPILER_IAR__)
+#  if KERNEL_FORCED_INLINE
+#     define _KERNEL_INLINE             _Pragma("inline=forced")
 #  else
-#     define _TN_INLINE             inline
+#     define _KERNEL_INLINE             inline
 #  endif
 /*
- * NOTE: for IAR, `_TN_INLINE` should go before `static`, because
+ * NOTE: for IAR, `_KERNEL_INLINE` should go before `static`, because
  * when we use forced inline by _Pragma, and `static` is before _Pragma,
  * then IAR compiler generates a warning that pragma should immediately
  * precede the declaration.
  */
-#  define _TN_STATIC_INLINE         _TN_INLINE static
-#  define _TN_VOLATILE_WORKAROUND   volatile
+#  define _KERNEL_STATIC_INLINE         _KERNEL_INLINE static
+#  define _KERNEL_VOLATILE_WORKAROUND   volatile
 #else
 #  error unknown Cortex compiler
 #endif
 
-#define _TN_ARCH_STACK_PT_TYPE   _TN_ARCH_STACK_PT_TYPE__FULL
-#define _TN_ARCH_STACK_DIR       _TN_ARCH_STACK_DIR__DESC
+#define _KERNEL_ARCH_STACK_PT_TYPE   _KERNEL_ARCH_STACK_PT_TYPE__FULL
+#define _KERNEL_ARCH_STACK_DIR       _KERNEL_ARCH_STACK_DIR__DESC
 
 #endif   //-- DOXYGEN_SHOULD_SKIP_THIS
 
@@ -360,5 +360,5 @@ typedef  unsigned int               TN_UIntPtr;
 }  /* extern "C" */
 #endif
 
-#endif   // _TN_ARCH_CORTEX_M_H
+#endif   // _KERNEL_ARCH_CORTEX_M_H
 

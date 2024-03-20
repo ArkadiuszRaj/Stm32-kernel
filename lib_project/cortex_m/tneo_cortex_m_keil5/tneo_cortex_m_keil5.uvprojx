@@ -7,7 +7,7 @@
 
   <Targets>
     <Target>
-      <TargetName>tneo_cortex_m_keil5</TargetName>
+      <TargetName>kernel_cortex_m_keil5</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
       <TargetOption>
@@ -47,7 +47,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\Objects\</OutputDirectory>
-          <OutputName>tneo_cortex_m_keil5</OutputName>
+          <OutputName>kernel_cortex_m_keil5</OutputName>
           <CreateExecutable>0</CreateExecutable>
           <CreateLib>1</CreateLib>
           <CreateHexFile>0</CreateHexFile>
@@ -409,59 +409,59 @@
           <GroupName>core</GroupName>
           <Files>
             <File>
-              <FileName>tn_timer.c</FileName>
+              <FileName>kernel_timer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\core\tn_timer.c</FilePath>
+              <FilePath>..\..\..\src\core\kernel_timer.c</FilePath>
             </File>
             <File>
-              <FileName>tn_dqueue.c</FileName>
+              <FileName>kernel_dqueue.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\core\tn_dqueue.c</FilePath>
+              <FilePath>..\..\..\src\core\kernel_dqueue.c</FilePath>
             </File>
             <File>
-              <FileName>tn_eventgrp.c</FileName>
+              <FileName>kernel_eventgrp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\core\tn_eventgrp.c</FilePath>
+              <FilePath>..\..\..\src\core\kernel_eventgrp.c</FilePath>
             </File>
             <File>
-              <FileName>tn_fmem.c</FileName>
+              <FileName>kernel_fmem.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\core\tn_fmem.c</FilePath>
+              <FilePath>..\..\..\src\core\kernel_fmem.c</FilePath>
             </File>
             <File>
-              <FileName>tn_list.c</FileName>
+              <FileName>kernel_list.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\core\tn_list.c</FilePath>
+              <FilePath>..\..\..\src\core\kernel_list.c</FilePath>
             </File>
             <File>
-              <FileName>tn_mutex.c</FileName>
+              <FileName>kernel_mutex.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\core\tn_mutex.c</FilePath>
+              <FilePath>..\..\..\src\core\kernel_mutex.c</FilePath>
             </File>
             <File>
-              <FileName>tn_sem.c</FileName>
+              <FileName>kernel_sem.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\core\tn_sem.c</FilePath>
+              <FilePath>..\..\..\src\core\kernel_sem.c</FilePath>
             </File>
             <File>
-              <FileName>tn_sys.c</FileName>
+              <FileName>kernel_sys.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\core\tn_sys.c</FilePath>
+              <FilePath>..\..\..\src\core\kernel_sys.c</FilePath>
             </File>
             <File>
-              <FileName>tn_tasks.c</FileName>
+              <FileName>kernel_tasks.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\core\tn_tasks.c</FilePath>
+              <FilePath>..\..\..\src\core\kernel_tasks.c</FilePath>
             </File>
             <File>
-              <FileName>tn_timer_static.c</FileName>
+              <FileName>kernel_timer_static.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\core\tn_timer_static.c</FilePath>
+              <FilePath>..\..\..\src\core\kernel_timer_static.c</FilePath>
             </File>
             <File>
-              <FileName>tn_timer_dyn.c</FileName>
+              <FileName>kernel_timer_dyn.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\core\tn_timer_dyn.c</FilePath>
+              <FilePath>..\..\..\src\core\kernel_timer_dyn.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -469,14 +469,14 @@
           <GroupName>arch</GroupName>
           <Files>
             <File>
-              <FileName>tn_arch_cortex_m_c.c</FileName>
+              <FileName>kernel_arch_cortex_m_c.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\arch\cortex_m\tn_arch_cortex_m_c.c</FilePath>
+              <FilePath>..\..\..\src\arch\cortex_m\kernel_arch_cortex_m_c.c</FilePath>
             </File>
             <File>
-              <FileName>tn_arch_cortex_m.S</FileName>
+              <FileName>kernel_arch_cortex_m.S</FileName>
               <FileType>2</FileType>
-              <FilePath>..\..\..\src\arch\cortex_m\tn_arch_cortex_m.S</FilePath>
+              <FilePath>..\..\..\src\arch\cortex_m\kernel_arch_cortex_m.S</FilePath>
             </File>
           </Files>
         </Group>

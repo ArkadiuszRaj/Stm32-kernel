@@ -1,18 +1,18 @@
 /*******************************************************************************
  *
- * TNeo: real-time kernel initially based on TNKernel
+ * KERNEL: real-time kernel initially based on KERNELKernel
  *
- *    TNKernel:                  copyright 2004, 2013 Yuri Tiomkin.
+ *    KERNELKernel:                  copyright 2004, 2013 Yuri Tiomkin.
  *    PIC32-specific routines:   copyright 2013, 2014 Anders Montonen.
- *    TNeo:                      copyright 2014       Dmitry Frank.
+ *    KERNEL:                      copyright 2014       Dmitry Frank.
  *
- *    TNeo was born as a thorough review and re-implementation of
- *    TNKernel. The new kernel has well-formed code, inherited bugs are fixed
+ *    KERNEL was born as a thorough review and re-implementation of
+ *    KERNELKernel. The new kernel has well-formed code, inherited bugs are fixed
  *    as well as new features being added, and it is tested carefully with
  *    unit-tests.
  *
- *    API is changed somewhat, so it's not 100% compatible with TNKernel,
- *    hence the new name: TNeo.
+ *    API is changed somewhat, so it's not 100% compatible with KERNELKernel,
+ *    hence the new name: KERNEL.
  *
  *    Permission to use, copy, modify, and distribute this software in source
  *    and binary forms and its documentation for any purpose and without fee
@@ -22,7 +22,7 @@
  *
  *    THIS SOFTWARE IS PROVIDED BY THE DMITRY FRANK AND CONTRIBUTORS "AS IS"
  *    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FIKERNELESS FOR A PARTICULAR
  *    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL DMITRY FRANK OR CONTRIBUTORS BE
  *    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  *    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
@@ -34,15 +34,15 @@
  *
  ******************************************************************************/
 
-#ifndef __TN_TASKS_H
-#define __TN_TASKS_H
+#ifndef __KERNEL_TASKS_H
+#define __KERNEL_TASKS_H
 
 /*******************************************************************************
  *    INCLUDED FILES
  ******************************************************************************/
 
-#include "_tn_sys.h"
-#include "tn_tasks.h"
+#include "_kernel_sys.h"
+#include "kernel_tasks.h"
 
 
 
@@ -68,11 +68,11 @@ extern "C"  {     /*}*/
  ******************************************************************************/
 
 /**
- * Get pointer to `struct #TN_Task` by pointer to the `task_queue` member
- * of the `struct #TN_Task`.
+ * Get pointer to `struct #KERNEL_Task` by pointer to the `task_queue` member
+ * of the `struct #KERNEL_Task`.
  */
-#define _tn_get_task_by_tsk_queue(que)                                   \
-   (que ? container_of(que, struct TN_Task, task_queue) : 0)
+#define _kernel_get_task_by_tsk_queue(que)                                   \
+   (que ? container_of(que, struct KERNEL_Task, task_queue) : 0)
 
 
 
@@ -86,32 +86,32 @@ extern "C"  {     /*}*/
 //-- runnable {{{
 
 /**
- * Bring task to the $(TN_TASK_STATE_RUNNABLE) state.
+ * Bring task to the $(KERNEL_TASK_STATE_RUNNABLE) state.
  * Should be called when task_state is NONE.
  *
  * Set RUNNABLE bit in task_state,
  * put task on the 'ready queue' for its priority,
  *
  * if priority of given `task` is higher than priority of
- * `_tn_next_task_to_run`, then set `_tn_next_task_to_run` to given `task`.
+ * `_kernel_next_task_to_run`, then set `_kernel_next_task_to_run` to given `task`.
  */
-void _tn_task_set_runnable(struct TN_Task *task);
+void _kernel_task_set_runnable(struct KERNEL_Task *task);
 
 /**
- * Bring task out from the $(TN_TASK_STATE_RUNNABLE) state.
+ * Bring task out from the $(KERNEL_TASK_STATE_RUNNABLE) state.
  * Should be called when task_state has just single RUNNABLE bit set.
  *
  * Clear RUNNABLE bit, remove task from 'ready queue', determine and set
- * new `#_tn_next_task_to_run`.
+ * new `#_kernel_next_task_to_run`.
  */
-void _tn_task_clear_runnable(struct TN_Task *task);
+void _kernel_task_clear_runnable(struct KERNEL_Task *task);
 
 /**
- * Returns whether given task is in $(TN_TASK_STATE_RUNNABLE) state.
+ * Returns whether given task is in $(KERNEL_TASK_STATE_RUNNABLE) state.
  */
-_TN_STATIC_INLINE TN_BOOL _tn_task_is_runnable(struct TN_Task *task)
+_KERNEL_STATIC_INLINE KERNEL_BOOL _kernel_task_is_runnable(struct KERNEL_Task *task)
 {
-   return !!(task->task_state & TN_TASK_STATE_RUNNABLE);
+   return !!(task->task_state & KERNEL_TASK_STATE_RUNNABLE);
 }
 
 //}}}
@@ -119,50 +119,50 @@ _TN_STATIC_INLINE TN_BOOL _tn_task_is_runnable(struct TN_Task *task)
 //-- wait {{{
 
 /**
- * Bring task to the $(TN_TASK_STATE_WAIT) state.
- * Should be called when task_state is either NONE or $(TN_TASK_STATE_SUSPEND).
+ * Bring task to the $(KERNEL_TASK_STATE_WAIT) state.
+ * Should be called when task_state is either NONE or $(KERNEL_TASK_STATE_SUSPEND).
  *
  * @param task
- *    Task to bring to the $(TN_TASK_STATE_WAIT) state
+ *    Task to bring to the $(KERNEL_TASK_STATE_WAIT) state
  *
  * @param wait_que
- *    Wait queue to put task in, may be `#TN_NULL`. If not `#TN_NULL`, task is
- *    included in that list by `task_queue` member of `struct #TN_Task`.
+ *    Wait queue to put task in, may be `#KERNEL_NULL`. If not `#KERNEL_NULL`, task is
+ *    included in that list by `task_queue` member of `struct #KERNEL_Task`.
  *
  * @param wait_reason
- *    Reason of waiting, see `enum #TN_WaitReason`.
+ *    Reason of waiting, see `enum #KERNEL_WaitReason`.
  *
  * @param timeout
- *    If neither `0` nor `#TN_WAIT_INFINITE`, task will be woken up by timer
+ *    If neither `0` nor `#KERNEL_WAIT_INFINITE`, task will be woken up by timer
  *    after specified number of system ticks.
  */
-void _tn_task_set_waiting(
-      struct TN_Task      *task,
-      struct TN_ListItem  *wait_que,
-      enum TN_WaitReason   wait_reason,
-      TN_TickCnt           timeout
+void _kernel_task_set_waiting(
+      struct KERNEL_Task      *task,
+      struct KERNEL_ListItem  *wait_que,
+      enum KERNEL_WaitReason   wait_reason,
+      KERNEL_TickCnt           timeout
       );
 
 /**
- * Bring task out from the $(TN_TASK_STATE_WAIT) state.
- * Task must be already in the $(TN_TASK_STATE_WAIT) state. It may additionally
- * be in the $(TN_TASK_STATE_SUSPEND) state.
+ * Bring task out from the $(KERNEL_TASK_STATE_WAIT) state.
+ * Task must be already in the $(KERNEL_TASK_STATE_WAIT) state. It may additionally
+ * be in the $(KERNEL_TASK_STATE_SUSPEND) state.
  *
  * @param task
- *    Task to bring out from the $(TN_TASK_STATE_WAIT) state
+ *    Task to bring out from the $(KERNEL_TASK_STATE_WAIT) state
  *
- * @param wait_rc 
+ * @param wait_rc
  *    return code that will be returned to waiting task from waited function.
  */
-void _tn_task_clear_waiting(struct TN_Task *task, enum TN_RCode wait_rc);
+void _kernel_task_clear_waiting(struct KERNEL_Task *task, enum KERNEL_RCode wait_rc);
 
 /**
- * Returns whether given task is in $(TN_TASK_STATE_WAIT) state. 
- * Note that this state could be combined with $(TN_TASK_STATE_SUSPEND) state.
+ * Returns whether given task is in $(KERNEL_TASK_STATE_WAIT) state.
+ * Note that this state could be combined with $(KERNEL_TASK_STATE_SUSPEND) state.
  */
-_TN_STATIC_INLINE TN_BOOL _tn_task_is_waiting(struct TN_Task *task)
+_KERNEL_STATIC_INLINE KERNEL_BOOL _kernel_task_is_waiting(struct KERNEL_Task *task)
 {
-   return !!(task->task_state & TN_TASK_STATE_WAIT);
+   return !!(task->task_state & KERNEL_TASK_STATE_WAIT);
 }
 
 //}}}
@@ -170,31 +170,31 @@ _TN_STATIC_INLINE TN_BOOL _tn_task_is_waiting(struct TN_Task *task)
 //-- suspended {{{
 
 /**
- * Bring task to the $(TN_TASK_STATE_SUSPEND ) state.
- * Should be called when `task_state` is either NONE or $(TN_TASK_STATE_WAIT).
+ * Bring task to the $(KERNEL_TASK_STATE_SUSPEND ) state.
+ * Should be called when `task_state` is either NONE or $(KERNEL_TASK_STATE_WAIT).
  *
  * @param task
- *    Task to bring to the $(TN_TASK_STATE_SUSPEND) state
+ *    Task to bring to the $(KERNEL_TASK_STATE_SUSPEND) state
  */
-void _tn_task_set_suspended(struct TN_Task *task);
+void _kernel_task_set_suspended(struct KERNEL_Task *task);
 
 /**
- * Bring task out from the $(TN_TASK_STATE_SUSPEND) state.
- * Task must be already in the $(TN_TASK_STATE_SUSPEND) state. It may
- * additionally be in the $(TN_TASK_STATE_WAIT) state.
+ * Bring task out from the $(KERNEL_TASK_STATE_SUSPEND) state.
+ * Task must be already in the $(KERNEL_TASK_STATE_SUSPEND) state. It may
+ * additionally be in the $(KERNEL_TASK_STATE_WAIT) state.
  *
  * @param task
- *    Task to bring out from the $(TN_TASK_STATE_SUSPEND) state
+ *    Task to bring out from the $(KERNEL_TASK_STATE_SUSPEND) state
  */
-void _tn_task_clear_suspended(struct TN_Task *task);
+void _kernel_task_clear_suspended(struct KERNEL_Task *task);
 
 /**
- * Returns whether given task is in $(TN_TASK_STATE_SUSPEND) state. 
- * Note that this state could be combined with $(TN_TASK_STATE_WAIT) state.
+ * Returns whether given task is in $(KERNEL_TASK_STATE_SUSPEND) state.
+ * Note that this state could be combined with $(KERNEL_TASK_STATE_WAIT) state.
  */
-_TN_STATIC_INLINE TN_BOOL _tn_task_is_suspended(struct TN_Task *task)
+_KERNEL_STATIC_INLINE KERNEL_BOOL _kernel_task_is_suspended(struct KERNEL_Task *task)
 {
-   return !!(task->task_state & TN_TASK_STATE_SUSPEND);
+   return !!(task->task_state & KERNEL_TASK_STATE_SUSPEND);
 }
 
 //}}}
@@ -202,29 +202,29 @@ _TN_STATIC_INLINE TN_BOOL _tn_task_is_suspended(struct TN_Task *task)
 //-- dormant {{{
 
 /**
- * Bring task to the $(TN_TASK_STATE_DORMANT) state.
+ * Bring task to the $(KERNEL_TASK_STATE_DORMANT) state.
  * Should be called when task_state is NONE.
  *
  * Set DORMANT bit in task_state, reset task's priority to base value,
  * reset time slice count to 0.
  */
-void _tn_task_set_dormant(struct TN_Task* task);
+void _kernel_task_set_dormant(struct KERNEL_Task* task);
 
 /**
- * Bring task out from the $(TN_TASK_STATE_DORMANT) state.
+ * Bring task out from the $(KERNEL_TASK_STATE_DORMANT) state.
  * Should be called when task_state has just single DORMANT bit set.
  *
  * Note: task's stack will be initialized inside this function (that is,
- * `#_tn_arch_stack_init()` will be called)
+ * `#_kernel_arch_stack_init()` will be called)
  */
-void _tn_task_clear_dormant(struct TN_Task *task);
+void _kernel_task_clear_dormant(struct KERNEL_Task *task);
 
 /**
- * Returns whether given task is in $(TN_TASK_STATE_DORMANT) state.
+ * Returns whether given task is in $(KERNEL_TASK_STATE_DORMANT) state.
  */
-_TN_STATIC_INLINE TN_BOOL _tn_task_is_dormant(struct TN_Task *task)
+_KERNEL_STATIC_INLINE KERNEL_BOOL _kernel_task_is_dormant(struct KERNEL_Task *task)
 {
-   return !!(task->task_state & TN_TASK_STATE_DORMANT);
+   return !!(task->task_state & KERNEL_TASK_STATE_DORMANT);
 }
 
 //}}}
@@ -234,34 +234,34 @@ _TN_STATIC_INLINE TN_BOOL _tn_task_is_dormant(struct TN_Task *task)
 
 
 /**
- * Callback that is given to `_tn_task_first_wait_complete()`, may perform
+ * Callback that is given to `_kernel_task_first_wait_complete()`, may perform
  * any needed actions before waking task up, e.g. set some data in the `struct
- * #TN_Task` that task is waiting for.
+ * #KERNEL_Task` that task is waiting for.
  *
  * @param task
  *    Task that is going to be waken up
  *
  * @param user_data_1
- *    Arbitrary user data given to `_tn_task_first_wait_complete()`
+ *    Arbitrary user data given to `_kernel_task_first_wait_complete()`
  *
  * @param user_data_2
- *    Arbitrary user data given to `_tn_task_first_wait_complete()`
+ *    Arbitrary user data given to `_kernel_task_first_wait_complete()`
  */
-typedef void (_TN_CBBeforeTaskWaitComplete)(
-      struct TN_Task   *task,
+typedef void (_KERNEL_CBBeforeTaskWaitComplete)(
+      struct KERNEL_Task   *task,
       void             *user_data_1,
       void             *user_data_2
       );
 
 /**
- * See the comment for tn_task_activate, tn_task_iactivate in the tn_tasks.h.
+ * See the comment for kernel_task_activate, kernel_task_iactivate in the kernel_tasks.h.
  *
- * It merely brings task out from the $(TN_TASK_STATE_DORMANT) state and 
- * brings it to the $(TN_TASK_STATE_RUNNABLE) state.
+ * It merely brings task out from the $(KERNEL_TASK_STATE_DORMANT) state and
+ * brings it to the $(KERNEL_TASK_STATE_RUNNABLE) state.
  *
- * If task is not in the `DORMANT` state, `#TN_RC_WSTATE` is returned.
+ * If task is not in the `DORMANT` state, `#KERNEL_RC_WSTATE` is returned.
  */
-enum TN_RCode _tn_task_activate(struct TN_Task *task);
+enum KERNEL_RCode _kernel_task_activate(struct KERNEL_Task *task);
 
 
 /**
@@ -269,13 +269,13 @@ enum TN_RCode _tn_task_activate(struct TN_Task *task);
  *
  * @param wait_rc return code that will be returned to waiting task
  */
-_TN_STATIC_INLINE void _tn_task_wait_complete(struct TN_Task *task, enum TN_RCode wait_rc)
+_KERNEL_STATIC_INLINE void _kernel_task_wait_complete(struct KERNEL_Task *task, enum KERNEL_RCode wait_rc)
 {
-   _tn_task_clear_waiting(task, wait_rc);
+   _kernel_task_clear_waiting(task, wait_rc);
 
    //-- if task isn't suspended, make it runnable
-   if (!_tn_task_is_suspended(task)){
-      _tn_task_set_runnable(task);
+   if (!_kernel_task_is_suspended(task)){
+      _kernel_task_set_runnable(task);
    }
 
 }
@@ -284,27 +284,27 @@ _TN_STATIC_INLINE void _tn_task_wait_complete(struct TN_Task *task, enum TN_RCod
 /**
  * Should be called when task starts waiting for anything.
  *
- * It merely calls `#_tn_task_clear_runnable()` and then
- * `#_tn_task_set_waiting()` for current task (`#_tn_curr_run_task`).
+ * It merely calls `#_kernel_task_clear_runnable()` and then
+ * `#_kernel_task_set_waiting()` for current task (`#_kernel_curr_run_task`).
  */
-_TN_STATIC_INLINE void _tn_task_curr_to_wait_action(
-      struct TN_ListItem *wait_que,
-      enum TN_WaitReason wait_reason,
-      TN_TickCnt timeout
+_KERNEL_STATIC_INLINE void _kernel_task_curr_to_wait_action(
+      struct KERNEL_ListItem *wait_que,
+      enum KERNEL_WaitReason wait_reason,
+      KERNEL_TickCnt timeout
       )
 {
-   _tn_task_clear_runnable(_tn_curr_run_task);
-   _tn_task_set_waiting(_tn_curr_run_task, wait_que, wait_reason, timeout);
+   _kernel_task_clear_runnable(_kernel_curr_run_task);
+   _kernel_task_set_waiting(_kernel_curr_run_task, wait_que, wait_reason, timeout);
 }
 
 
 /**
  * Change priority of any task (either runnable or non-runnable)
  */
-void _tn_change_task_priority(struct TN_Task *task, int new_priority);
+void _kernel_change_task_priority(struct KERNEL_Task *task, int new_priority);
 
 /**
- * When changing priority of the runnable task, this function 
+ * When changing priority of the runnable task, this function
  * should be called instead of plain assignment.
  *
  * For non-runnable tasks, this function should never be called.
@@ -313,24 +313,24 @@ void _tn_change_task_priority(struct TN_Task *task, int new_priority);
  * change its priority, add to the end of ready queue of new priority,
  * find next task to run.
  */
-void  _tn_change_running_task_priority(struct TN_Task *task, int new_priority);
+void  _kernel_change_running_task_priority(struct KERNEL_Task *task, int new_priority);
 
 #if 0
-#define _tn_task_set_last_rc(rc)  { _tn_curr_run_task = (rc); }
+#define _kernel_task_set_last_rc(rc)  { _kernel_curr_run_task = (rc); }
 
 /**
- * If given return code is not `#TN_RC_OK`, save it in the task's structure
+ * If given return code is not `#KERNEL_RC_OK`, save it in the task's structure
  */
-void _tn_task_set_last_rc_if_error(enum TN_RCode rc);
+void _kernel_task_set_last_rc_if_error(enum KERNEL_RCode rc);
 #endif
 
-#if TN_USE_MUTEXES
+#if KERNEL_USE_MUTEXES
 /**
  * Check if mutex is locked by task.
  *
- * @return TN_TRUE if mutex is locked, TN_FALSE otherwise.
+ * @return KERNEL_TRUE if mutex is locked, KERNEL_FALSE otherwise.
  */
-TN_BOOL _tn_is_mutex_locked_by_task(struct TN_Task *task, struct TN_Mutex *mutex);
+KERNEL_BOOL _kernel_is_mutex_locked_by_task(struct KERNEL_Task *task, struct KERNEL_Mutex *mutex);
 #endif
 
 /**
@@ -342,11 +342,11 @@ TN_BOOL _tn_is_mutex_locked_by_task(struct TN_Task *task, struct TN_Mutex *mutex
  *
  * @param wait_rc
  *    Code that will be returned to woken-up task as a result of waiting
- *    (this code is just given to `_tn_task_wait_complete()` actually)
+ *    (this code is just given to `_kernel_task_wait_complete()` actually)
  *
  * @param callback
- *    Callback function to call before wake task up, see 
- *    `#_TN_CBBeforeTaskWaitComplete`. Can be `TN_NULL`.
+ *    Callback function to call before wake task up, see
+ *    `#_KERNEL_CBBeforeTaskWaitComplete`. Can be `KERNEL_NULL`.
  *
  * @param user_data_1
  *    Arbitrary data that is passed to the callback
@@ -356,26 +356,26 @@ TN_BOOL _tn_is_mutex_locked_by_task(struct TN_Task *task, struct TN_Mutex *mutex
  *
  *
  * @return
- *    - `TN_TRUE` if queue is not empty and task has woken up
- *    - `TN_FALSE` if queue is empty, so, no task to wake up
+ *    - `KERNEL_TRUE` if queue is not empty and task has woken up
+ *    - `KERNEL_FALSE` if queue is empty, so, no task to wake up
  */
-TN_BOOL _tn_task_first_wait_complete(
-      struct TN_ListItem           *wait_queue,
-      enum TN_RCode                 wait_rc,
-      _TN_CBBeforeTaskWaitComplete *callback,
+KERNEL_BOOL _kernel_task_first_wait_complete(
+      struct KERNEL_ListItem           *wait_queue,
+      enum KERNEL_RCode                 wait_rc,
+      _KERNEL_CBBeforeTaskWaitComplete *callback,
       void                         *user_data_1,
       void                         *user_data_2
       );
 
 
 /**
- * The same as `tn_task_exit(0)`, we need this function that takes no arguments
+ * The same as `kernel_task_exit(0)`, we need this function that takes no arguments
  * for exiting from task body function: we just set up initial task's stack so
- * that return address is `#_tn_task_exit_nodelete`, and it works.
+ * that return address is `#_kernel_task_exit_nodelete`, and it works.
  *
  * If the function takes arguments, it becomes much harder.
  */
-void _tn_task_exit_nodelete(void);
+void _kernel_task_exit_nodelete(void);
 
 /**
  * Returns end address of the stack. It depends on architecture stack
@@ -390,8 +390,8 @@ void _tn_task_exit_nodelete(void);
  * @return
  *    End address of the stack.
  */
-TN_UWord *_tn_task_stack_end_get(
-      struct TN_Task *task
+KERNEL_UWord *_kernel_task_stack_end_get(
+      struct KERNEL_Task *task
       );
 
 /*******************************************************************************
@@ -399,14 +399,14 @@ TN_UWord *_tn_task_stack_end_get(
  ******************************************************************************/
 
 /**
- * Checks whether given task object is valid 
- * (actually, just checks against `id_task` field, see `enum #TN_ObjId`)
+ * Checks whether given task object is valid
+ * (actually, just checks against `id_task` field, see `enum #KERNEL_ObjId`)
  */
-_TN_STATIC_INLINE TN_BOOL _tn_task_is_valid(
-      const struct TN_Task   *task
+_KERNEL_STATIC_INLINE KERNEL_BOOL _kernel_task_is_valid(
+      const struct KERNEL_Task   *task
       )
 {
-   return (task->id_task == TN_ID_TASK);
+   return (task->id_task == KERNEL_ID_TASK);
 }
 
 
@@ -416,7 +416,7 @@ _TN_STATIC_INLINE TN_BOOL _tn_task_is_valid(
 #endif
 
 
-#endif // __TN_TASKS_H
+#endif // __KERNEL_TASKS_H
 
 
 /*******************************************************************************

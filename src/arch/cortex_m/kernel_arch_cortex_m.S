@@ -1,18 +1,18 @@
 /* ******************************************************************************
  *
- * TNeo: real-time kernel initially based on TNKernel
+ * KERNEL: real-time kernel initially based on KERNELKernel
  *
- *    TNKernel:                  copyright 2004, 2013 Yuri Tiomkin.
+ *    KERNELKernel:                  copyright 2004, 2013 Yuri Tiomkin.
  *    PIC32-specific routines:   copyright 2013, 2014 Anders Montonen.
- *    TNeo:                      copyright 2014       Dmitry Frank.
+ *    KERNEL:                      copyright 2014       Dmitry Frank.
  *
- *    TNeo was born as a thorough review and re-implementation of
- *    TNKernel. The new kernel has well-formed code, inherited bugs are fixed
+ *    KERNEL was born as a thorough review and re-implementation of
+ *    KERNELKernel. The new kernel has well-formed code, inherited bugs are fixed
  *    as well as new features being added, and it is tested carefully with
  *    unit-tests.
  *
- *    API is changed somewhat, so it's not 100% compatible with TNKernel,
- *    hence the new name: TNeo.
+ *    API is changed somewhat, so it's not 100% compatible with KERNELKernel,
+ *    hence the new name: KERNEL.
  *
  *    Permission to use, copy, modify, and distribute this software in source
  *    and binary forms and its documentation for any purpose and without fee
@@ -22,7 +22,7 @@
  *
  *    THIS SOFTWARE IS PROVIDED BY THE DMITRY FRANK AND CONTRIBUTORS "AS IS"
  *    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FIKERNELESS FOR A PARTICULAR
  *    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL DMITRY FRANK OR CONTRIBUTORS BE
  *    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  *    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
@@ -38,7 +38,7 @@
  *
  * \file
  *
- * TNeo architecture-dependent routines for Cortex-M0/M0+/M1/M3/M4/M4F.
+ * KERNEL architecture-dependent routines for Cortex-M0/M0+/M1/M3/M4/M4F.
  *
  * Assemblers supported:
  *
@@ -48,24 +48,24 @@
  * - IAR
  *
  * NOTE: this file should be parsed by C preprocessor before assembling.
- * 
+ *
  * If your toolchain is unable to do it for you automatically (say, Keil
  * uVision + GCC seem unable), it is possible for you to issue cpp (C
  * preprocessor) manually. Say, for GNU assembler and Cortex-M3, the following
  * command does the trick:
  *
- *    cpp -P -undef tn_arch_cortex_m.S                         \
+ *    cpp -P -undef kernel_arch_cortex_m.S                         \
  *          -D __GNUC__ -D __ARM_ARCH -D __ARM_ARCH_7M__       \
  *          -I ../.. -I ../../core                             \
- *          > tn_arch_cortex_m3_gcc.s
+ *          > kernel_arch_cortex_m3_gcc.s
  *
- * And then, you should include the output file tn_arch_cortex_m3_gcc.s to your
- * project, instead of this one (tn_arch_cortex_m.S).
+ * And then, you should include the output file kernel_arch_cortex_m3_gcc.s to your
+ * project, instead of this one (kernel_arch_cortex_m.S).
  *
  * For other cores/compilers, you need to change predefined macros ( -D ... ),
- * you can check the file src/arch/tn_arch_detect.h to see what it expects for
+ * you can check the file src/arch/kernel_arch_detect.h to see what it expects for
  * each particular core/compiler.
- * 
+ *
  * Say, when GCC toolchain is used from Keil uVision IDE, for .S files it calls
  * arm-none-eabi-as, which does not call C preprocessor.
  *
@@ -81,8 +81,8 @@
  *    INCLUDED FILES
  ******************************************************************************/
 
-#include "../tn_arch_detect.h"
-#include "tn_cfg_dispatch.h"
+#include "../kernel_arch_detect.h"
+#include "kernel_cfg_dispatch.h"
 
 
 
@@ -93,57 +93,57 @@
  *    DEFINITIONS
  ******************************************************************************/
 
-#if defined(__TN_COMPILER_ARMCC__)
+#if defined(__KERNEL_COMPILER_ARMCC__)
 
-#  define   _TN_NAME(x)             x
-#  define   _TN_LOCAL_NAME(x)       x
-#  define   _TN_EXTERN(x)           IMPORT _TN_NAME(x)
-#  define   _TN_GLOBAL(x)           EXPORT _TN_NAME(x)
-#  define   _TN_EQU(symbol, value)  symbol EQU value
-#  define   _TN_LABEL(label)        _TN_NAME(label)
-#  define   _TN_LOCAL_LABEL(label)  _TN_LOCAL_NAME(label)
-#  define   _TN_END()               END
-#  define   _TN_THUMB_FUNC()        /* nothing */
+#  define   _KERNEL_NAME(x)             x
+#  define   _KERNEL_LOCAL_NAME(x)       x
+#  define   _KERNEL_EXTERN(x)           IMPORT _KERNEL_NAME(x)
+#  define   _KERNEL_GLOBAL(x)           EXPORT _KERNEL_NAME(x)
+#  define   _KERNEL_EQU(symbol, value)  symbol EQU value
+#  define   _KERNEL_LABEL(label)        _KERNEL_NAME(label)
+#  define   _KERNEL_LOCAL_LABEL(label)  _KERNEL_LOCAL_NAME(label)
+#  define   _KERNEL_END()               END
+#  define   _KERNEL_THUMB_FUNC()        /* nothing */
 
-#elif defined(__TN_COMPILER_IAR__)
+#elif defined(__KERNEL_COMPILER_IAR__)
 
-#  define   _TN_NAME(x)             x
-#  define   _TN_LOCAL_NAME(x)       x
-#  define   _TN_EXTERN(x)           IMPORT x
-#  define   _TN_GLOBAL(x)           EXPORT x
-#  define   _TN_EQU(symbol, value)  symbol EQU value
-#  define   _TN_LABEL(label)        label:
-#  define   _TN_LOCAL_LABEL(label)  label:
-#  define   _TN_END()               END
-#  define   _TN_THUMB_FUNC()        /* nothing */
+#  define   _KERNEL_NAME(x)             x
+#  define   _KERNEL_LOCAL_NAME(x)       x
+#  define   _KERNEL_EXTERN(x)           IMPORT x
+#  define   _KERNEL_GLOBAL(x)           EXPORT x
+#  define   _KERNEL_EQU(symbol, value)  symbol EQU value
+#  define   _KERNEL_LABEL(label)        label:
+#  define   _KERNEL_LOCAL_LABEL(label)  label:
+#  define   _KERNEL_END()               END
+#  define   _KERNEL_THUMB_FUNC()        /* nothing */
 
-#elif defined(__TN_COMPILER_GCC__)
+#elif defined(__KERNEL_COMPILER_GCC__)
 
-#  define   _TN_NAME(x)             x
+#  define   _KERNEL_NAME(x)             x
 //-- We need to declare local labels prepended with "L" so that they aren't
 //   stripped by .subsections_via_symbols
-#  define   _TN_LOCAL_NAME(x)       L ## x
-#  define   _TN_EXTERN(x)           .extern _TN_NAME(x)
-#  define   _TN_GLOBAL(x)           .global _TN_NAME(x)
-#  define   _TN_EQU(symbol, value)  .equ symbol, value
-#  define   _TN_LABEL(label)        _TN_NAME(label):
-#  define   _TN_LOCAL_LABEL(label)  _TN_LOCAL_NAME(label):
-#  define   _TN_END()               /* nothing */
-#  define   _TN_THUMB_FUNC()        .thumb_func
+#  define   _KERNEL_LOCAL_NAME(x)       L ## x
+#  define   _KERNEL_EXTERN(x)           .extern _KERNEL_NAME(x)
+#  define   _KERNEL_GLOBAL(x)           .global _KERNEL_NAME(x)
+#  define   _KERNEL_EQU(symbol, value)  .equ symbol, value
+#  define   _KERNEL_LABEL(label)        _KERNEL_NAME(label):
+#  define   _KERNEL_LOCAL_LABEL(label)  _KERNEL_LOCAL_NAME(label):
+#  define   _KERNEL_END()               /* nothing */
+#  define   _KERNEL_THUMB_FUNC()        .thumb_func
 
-#elif defined(__TN_COMPILER_CLANG__)
+#elif defined(__KERNEL_COMPILER_CLANG__)
 
-#  define   _TN_NAME(x)             _ ## x
+#  define   _KERNEL_NAME(x)             _ ## x
 //-- We need to declare local labels prepended with "L" so that they aren't
 //   stripped by .subsections_via_symbols
-#  define   _TN_LOCAL_NAME(x)       L ## x
-#  define   _TN_EXTERN(x)           .extern _TN_NAME(x)
-#  define   _TN_GLOBAL(x)           .global _TN_NAME(x)
-#  define   _TN_EQU(symbol, value)  .equ symbol, value
-#  define   _TN_LABEL(label)        _TN_NAME(label):
-#  define   _TN_LOCAL_LABEL(label)  _TN_LOCAL_NAME(label):
-#  define   _TN_END()               /* nothing */
-#  define   _TN_THUMB_FUNC()        .thumb_func
+#  define   _KERNEL_LOCAL_NAME(x)       L ## x
+#  define   _KERNEL_EXTERN(x)           .extern _KERNEL_NAME(x)
+#  define   _KERNEL_GLOBAL(x)           .global _KERNEL_NAME(x)
+#  define   _KERNEL_EQU(symbol, value)  .equ symbol, value
+#  define   _KERNEL_LABEL(label)        _KERNEL_NAME(label):
+#  define   _KERNEL_LOCAL_LABEL(label)  _KERNEL_LOCAL_NAME(label):
+#  define   _KERNEL_END()               /* nothing */
+#  define   _KERNEL_THUMB_FUNC()        .thumb_func
 
 #else
 #  error unknown compiler for Cortex-M
@@ -151,7 +151,7 @@
 
 
 /*
- * Since we have on-context-switch handler (see _TN_ON_CONTEXT_SWITCH_HANDLER),
+ * Since we have on-context-switch handler (see _KERNEL_ON_CONTEXT_SWITCH_HANDLER),
  * LR is corrupted during context switch. So, we need to save it.
  * On Cortex M3/M4/M4F we have EXC_RETURN right in the task context,
  * so it is already saved and restored just fine.
@@ -164,9 +164,9 @@
  * there is some on-context-switch handler, then we should save/restore LR on
  * MSP during context switch.
  */
-#define     _TN_NEED_SAVE_LR()      (                                         \
-      !defined(__TN_ARCHFEAT_CORTEX_M_ARMv7M_ISA__)                           \
-      && _TN_ON_CONTEXT_SWITCH_HANDLER                                        \
+#define     _KERNEL_NEED_SAVE_LR()      (                                         \
+      !defined(__KERNEL_ARCHFEAT_CORTEX_M_ARMv7M_ISA__)                           \
+      && _KERNEL_ON_CONTEXT_SWITCH_HANDLER                                        \
       )
 
 
@@ -176,27 +176,27 @@
  *    ASM PROLOGUE
  ******************************************************************************/
 
-#if defined(__TN_COMPILER_ARMCC__)
+#if defined(__KERNEL_COMPILER_ARMCC__)
 
    AREA    |.text|, CODE, READONLY, ALIGN=3
    THUMB
    REQUIRE8
    PRESERVE8
 
-#elif defined(__TN_COMPILER_IAR__)
+#elif defined(__KERNEL_COMPILER_IAR__)
 
    SECTION  .text:CODE(2)
    THUMB
    REQUIRE8
    PRESERVE8
 
-#elif defined(__TN_COMPILER_GCC__)
+#elif defined(__KERNEL_COMPILER_GCC__)
 
    .text
    .syntax unified
    .thumb
 
-#elif defined(__TN_COMPILER_CLANG__)
+#elif defined(__KERNEL_COMPILER_CLANG__)
 
    .text
    .syntax unified
@@ -213,10 +213,10 @@
  *    EXTERN SYMBOLS
  ******************************************************************************/
 
-   _TN_EXTERN(_tn_curr_run_task)
-   _TN_EXTERN(_tn_next_task_to_run)
-#if _TN_ON_CONTEXT_SWITCH_HANDLER
-   _TN_EXTERN(_tn_sys_on_context_switch)
+   _KERNEL_EXTERN(_kernel_curr_run_task)
+   _KERNEL_EXTERN(_kernel_next_task_to_run)
+#if _KERNEL_ON_CONTEXT_SWITCH_HANDLER
+   _KERNEL_EXTERN(_kernel_sys_on_context_switch)
 #endif
 
 
@@ -225,24 +225,24 @@
  *    PUBLIC SYMBOLS
  ******************************************************************************/
 
-#if defined(__TN_ARCHFEAT_CORTEX_M_ARMv7M_ISA__)
-   _TN_GLOBAL(ffs_asm)
+#if defined(__KERNEL_ARCHFEAT_CORTEX_M_ARMv7M_ISA__)
+   _KERNEL_GLOBAL(ffs_asm)
 #endif
 
-   _TN_GLOBAL(PendSV_Handler)
-   _TN_GLOBAL(SVC_Handler)
-   _TN_GLOBAL(_tn_arch_sys_start)
-   _TN_GLOBAL(_tn_arch_context_switch_now_nosave)
-   _TN_GLOBAL(tn_arch_int_dis)
-   _TN_GLOBAL(tn_arch_int_en)
+   _KERNEL_GLOBAL(PendSV_Handler)
+   _KERNEL_GLOBAL(SVC_Handler)
+   _KERNEL_GLOBAL(_kernel_arch_sys_start)
+   _KERNEL_GLOBAL(_kernel_arch_context_switch_now_nosave)
+   _KERNEL_GLOBAL(kernel_arch_int_dis)
+   _KERNEL_GLOBAL(kernel_arch_int_en)
 
-   _TN_GLOBAL(tn_arch_sr_save_int_dis)
-   _TN_GLOBAL(tn_arch_sr_restore)
-   _TN_GLOBAL(_tn_arch_is_int_disabled)
-   _TN_GLOBAL(_tn_arch_inside_isr)
-   _TN_GLOBAL(_tn_arch_context_switch_pend)
-   _TN_GLOBAL(tn_arch_sched_dis_save)
-   _TN_GLOBAL(tn_arch_sched_restore)
+   _KERNEL_GLOBAL(kernel_arch_sr_save_int_dis)
+   _KERNEL_GLOBAL(kernel_arch_sr_restore)
+   _KERNEL_GLOBAL(_kernel_arch_is_int_disabled)
+   _KERNEL_GLOBAL(_kernel_arch_inside_isr)
+   _KERNEL_GLOBAL(_kernel_arch_context_switch_pend)
+   _KERNEL_GLOBAL(kernel_arch_sched_dis_save)
+   _KERNEL_GLOBAL(kernel_arch_sched_restore)
 
 
 
@@ -251,29 +251,29 @@
  ******************************************************************************/
 
 //-- Interrupt Control State Register Address
-_TN_EQU(ICSR_ADDR, 0xE000ED04)
+_KERNEL_EQU(ICSR_ADDR, 0xE000ED04)
 
 //-- PendSV bit in the Interrupt Control State Register
-_TN_EQU(PENDSVSET, 0x10000000)
+_KERNEL_EQU(PENDSVSET, 0x10000000)
 
 //-- System Handlers 12-15 Priority Register Address
-_TN_EQU(PR_08_11_ADDR, 0xE000ED1C)
+_KERNEL_EQU(PR_08_11_ADDR, 0xE000ED1C)
 
 //-- System Handlers 12-15 Priority Register Address
-_TN_EQU(PR_12_15_ADDR, 0xE000ED20)
+_KERNEL_EQU(PR_12_15_ADDR, 0xE000ED20)
 
 //-- PRI_14 (PendSV) priority in the System Handlers 12-15 Priority Register Address
 //   PendSV priority is minimal (0xFF)
-_TN_EQU(PENDS_VPRIORITY, 0x00FF0000)
+_KERNEL_EQU(PENDS_VPRIORITY, 0x00FF0000)
 
 //-- PRI_11 (SVC) priority in the System Handlers 08-11 Priority Register Address
 //   SVC priority is minimal (0xFF)
-_TN_EQU(SVC_VPRIORITY, 0xFF000000)
+_KERNEL_EQU(SVC_VPRIORITY, 0xFF000000)
 
 //-- We need to clear LSPEN bit in FPU->FPCCR, so that here's
 //   address and mask
-_TN_EQU(FPU_FPCCR_ADDR, 0xE000EF34)
-_TN_EQU(FPU_FPCCR_LSPEN, 0xBFFFFFFF)
+_KERNEL_EQU(FPU_FPCCR_ADDR, 0xE000EF34)
+_KERNEL_EQU(FPU_FPCCR_LSPEN, 0xBFFFFFFF)
 
 
 
@@ -282,9 +282,9 @@ _TN_EQU(FPU_FPCCR_LSPEN, 0xBFFFFFFF)
  *    CODE
  ******************************************************************************/
 
-#if defined(__TN_ARCHFEAT_CORTEX_M_ARMv7M_ISA__)
-_TN_THUMB_FUNC()
-_TN_LABEL(ffs_asm)
+#if defined(__KERNEL_ARCHFEAT_CORTEX_M_ARMv7M_ISA__)
+_KERNEL_THUMB_FUNC()
+_KERNEL_LABEL(ffs_asm)
 
       mov      r1, r0                  //-- tmp = in
       rsbs     r0, r1, #0              //-- in = -in
@@ -296,11 +296,11 @@ _TN_LABEL(ffs_asm)
 
 
 
-_TN_THUMB_FUNC()
-_TN_LABEL(PendSV_Handler)
+_KERNEL_THUMB_FUNC()
+_KERNEL_LABEL(PendSV_Handler)
 
-      //-- Save LR if needed (see comment for macro _TN_NEED_SAVE_LR())
-#if _TN_NEED_SAVE_LR()
+      //-- Save LR if needed (see comment for macro _KERNEL_NEED_SAVE_LR())
+#if _KERNEL_NEED_SAVE_LR()
       push     {lr}
 #endif
 
@@ -311,7 +311,7 @@ _TN_LABEL(PendSV_Handler)
       mrs      r2, PSP
 
       //-- save FPU callee-saved registers, if needed {{{
-#if defined(__TN_ARCHFEAT_CORTEX_M_FPU__)
+#if defined(__KERNEL_ARCHFEAT_CORTEX_M_FPU__)
 
       //-- if FPU is active, save S16-S31
       tst      lr, #0x10      //-- test bit 4 (Stack Frame type) of EXC_RETURN
@@ -322,7 +322,7 @@ _TN_LABEL(PendSV_Handler)
       // }}}
 
       //-- save callee-saved registers {{{
-#if defined(__TN_ARCHFEAT_CORTEX_M_ARMv7M_ISA__)
+#if defined(__KERNEL_ARCHFEAT_CORTEX_M_ARMv7M_ISA__)
       stmdb    r2!, {r4-r11, lr}
 #else
       subs     r2, #32     //-- allocate space for r4-r11
@@ -337,36 +337,36 @@ _TN_LABEL(PendSV_Handler)
       // }}}
 
       //-- get stack pointer of preempted task and save it in the
-      //   _tn_curr_run_task->stack_top
-      ldr      r5, =_TN_NAME(_tn_curr_run_task)   //-- r5 = &_tn_curr_run_task
-      ldr      r6, =_TN_NAME(_tn_next_task_to_run)//-- r6 = &_tn_next_task_to_run
-      ldr      r0, [r5]                //-- r0 =  _tn_curr_run_task
-      ldr      r1, [r6]                //-- r1 =  _tn_next_task_to_run
-      str      r2, [r0]                //-- _tn_curr_run_task->stack_top = SP
+      //   _kernel_curr_run_task->stack_top
+      ldr      r5, =_KERNEL_NAME(_kernel_curr_run_task)   //-- r5 = &_kernel_curr_run_task
+      ldr      r6, =_KERNEL_NAME(_kernel_next_task_to_run)//-- r6 = &_kernel_next_task_to_run
+      ldr      r0, [r5]                //-- r0 =  _kernel_curr_run_task
+      ldr      r1, [r6]                //-- r1 =  _kernel_next_task_to_run
+      str      r2, [r0]                //-- _kernel_curr_run_task->stack_top = SP
 
 
-#if _TN_ON_CONTEXT_SWITCH_HANDLER
+#if _KERNEL_ON_CONTEXT_SWITCH_HANDLER
       /*
        * arguments are set:
-       * - r0: _tn_curr_run_task
-       * - r1: _tn_next_task_to_run
+       * - r0: _kernel_curr_run_task
+       * - r1: _kernel_next_task_to_run
        */
-      bl       _TN_NAME(_tn_sys_on_context_switch)
+      bl       _KERNEL_NAME(_kernel_sys_on_context_switch)
 #endif
 
-      //-- _tn_curr_run_task = _tn_next_task_to_run
-      ldr      r4, [r6]                //-- r4 =  _tn_next_task_to_run
-      str      r4, [r5]                //-- _tn_curr_run_task = _tn_next_task_to_run
+      //-- _kernel_curr_run_task = _kernel_next_task_to_run
+      ldr      r4, [r6]                //-- r4 =  _kernel_next_task_to_run
+      str      r4, [r5]                //-- _kernel_curr_run_task = _kernel_next_task_to_run
 
-      //-- r4 is now _tn_curr_run_task
+      //-- r4 is now _kernel_curr_run_task
 
-_TN_LOCAL_LABEL(__context_restore)  //-- if you branch here, r4 should be _tn_curr_run_task
+_KERNEL_LOCAL_LABEL(__context_restore)  //-- if you branch here, r4 should be _kernel_curr_run_task
 
       //-- load stack pointer of newly activated task to r0
-      ldr      r0, [r4]       //-- r0 = _tn_curr_run_task->stack_top
+      ldr      r0, [r4]       //-- r0 = _kernel_curr_run_task->stack_top
 
       //-- restore callee-saved registers {{{
-#if defined(__TN_ARCHFEAT_CORTEX_M_ARMv7M_ISA__)
+#if defined(__KERNEL_ARCHFEAT_CORTEX_M_ARMv7M_ISA__)
       ldmia    r0!, {r4-r11, lr}  //-- load callee-saved registers, plus lr
 #else
       adds     r0, #16
@@ -382,7 +382,7 @@ _TN_LOCAL_LABEL(__context_restore)  //-- if you branch here, r4 should be _tn_cu
       // }}}
 
       //-- restore FPU callee-saved registers, if needed {{{
-#if defined(__TN_ARCHFEAT_CORTEX_M_FPU__)
+#if defined(__KERNEL_ARCHFEAT_CORTEX_M_FPU__)
 
       //if FPU was active in the newly activated task, restore S16-S31
       tst      lr, #0x10      //-- test bit 4 (Stack Frame type) of EXC_RETURN
@@ -396,8 +396,8 @@ _TN_LOCAL_LABEL(__context_restore)  //-- if you branch here, r4 should be _tn_cu
 
       cpsie    i              //-- enable core int
 
-      //-- Restore LR if needed (see comment for macro _TN_NEED_SAVE_LR())
-#if _TN_NEED_SAVE_LR()
+      //-- Restore LR if needed (see comment for macro _KERNEL_NEED_SAVE_LR())
+#if _KERNEL_NEED_SAVE_LR()
       pop      {r0}
       mov      lr, r0
 #endif
@@ -405,11 +405,11 @@ _TN_LOCAL_LABEL(__context_restore)  //-- if you branch here, r4 should be _tn_cu
       bx       lr
 
 
-_TN_THUMB_FUNC()
-_TN_LABEL(_tn_arch_sys_start)
+_KERNEL_THUMB_FUNC()
+_KERNEL_LABEL(_kernel_arch_sys_start)
       //-- arguments:
       //     r0:  int_stack
-      //     r1:  int_stack_size   (in TN_UWord)
+      //     r1:  int_stack_size   (in KERNEL_UWord)
 
       //-- we need to initialize MSP, but before we can do that, we should
       //   switch to PSP, so that MSP will stay untouched after we
@@ -452,7 +452,7 @@ _TN_LABEL(_tn_arch_sys_start)
       orrs     r0, r0, r2              //-- set PRI_11 (SVC) to 0xFF - minimal
       str      r0, [r1]
 
-#if defined(__TN_ARCHFEAT_CORTEX_M_FPU__)
+#if defined(__KERNEL_ARCHFEAT_CORTEX_M_FPU__)
       //-- disable lazy stacking (so that if interrupted task uses FPU
       //   at the moment, registers S0-S16 are certainly saved by the hardware)
       ldr      r1, =FPU_FPCCR_ADDR               //-- Load the System 8-11 Priority Register
@@ -464,10 +464,10 @@ _TN_LABEL(_tn_arch_sys_start)
 
 
 
-      //-- proceed to _tn_arch_context_switch_now_nosave() ..
+      //-- proceed to _kernel_arch_context_switch_now_nosave() ..
 
-_TN_THUMB_FUNC()
-_TN_LABEL(_tn_arch_context_switch_now_nosave)
+_KERNEL_THUMB_FUNC()
+_KERNEL_LABEL(_kernel_arch_context_switch_now_nosave)
 
       //-- we should enable core int because we're going to
       //   call SVC. If interrupts are disabled,
@@ -479,86 +479,86 @@ _TN_LABEL(_tn_arch_context_switch_now_nosave)
 
 
       //-- SVC is used for context_switch_now_nosave.
-_TN_THUMB_FUNC()
-_TN_LABEL(SVC_Handler)
+_KERNEL_THUMB_FUNC()
+_KERNEL_LABEL(SVC_Handler)
 
       //-- there is just one service possible: context_switch_now_nosave,
       //   so, we don't check params.
 
-      //-- Save LR if needed (see comment for macro _TN_NEED_SAVE_LR())
-#if _TN_NEED_SAVE_LR()
+      //-- Save LR if needed (see comment for macro _KERNEL_NEED_SAVE_LR())
+#if _KERNEL_NEED_SAVE_LR()
       push     {lr}
 #endif
 
       cpsid    i              //-- Disable core int
 
-      ldr      r5, =_TN_NAME(_tn_curr_run_task)    //-- r5 = &_tn_curr_run_task
-      ldr      r6, =_TN_NAME(_tn_next_task_to_run) //-- r6 = &_tn_next_task_to_run
-      ldr      r0, [r5]                            //-- r0 =  _tn_curr_run_task
-      ldr      r1, [r6]                            //-- r1 =  _tn_next_task_to_run
+      ldr      r5, =_KERNEL_NAME(_kernel_curr_run_task)    //-- r5 = &_kernel_curr_run_task
+      ldr      r6, =_KERNEL_NAME(_kernel_next_task_to_run) //-- r6 = &_kernel_next_task_to_run
+      ldr      r0, [r5]                            //-- r0 =  _kernel_curr_run_task
+      ldr      r1, [r6]                            //-- r1 =  _kernel_next_task_to_run
 
-#if _TN_ON_CONTEXT_SWITCH_HANDLER
+#if _KERNEL_ON_CONTEXT_SWITCH_HANDLER
       /*
        * arguments are set:
-       * - r0: _tn_curr_run_task
-       * - r1: _tn_next_task_to_run
+       * - r0: _kernel_curr_run_task
+       * - r1: _kernel_next_task_to_run
        */
-      bl       _TN_NAME(_tn_sys_on_context_switch)
+      bl       _KERNEL_NAME(_kernel_sys_on_context_switch)
 #endif
 
-      ldr      r4, [r6]                   //-- r4 =  _tn_next_task_to_run
-      str      r4, [r5]                   //-- _tn_curr_run_task = _tn_next_task_to_run
+      ldr      r4, [r6]                   //-- r4 =  _kernel_next_task_to_run
+      str      r4, [r5]                   //-- _kernel_curr_run_task = _kernel_next_task_to_run
 
-      //-- r4 is now _tn_curr_run_task
+      //-- r4 is now _kernel_curr_run_task
 
-      //-- proceed to context restore (r4 must be set to _tn_curr_run_task)
-      b        _TN_LOCAL_NAME(__context_restore)
+      //-- proceed to context restore (r4 must be set to _kernel_curr_run_task)
+      b        _KERNEL_LOCAL_NAME(__context_restore)
 
 
 
-_TN_THUMB_FUNC()
-_TN_LABEL(tn_arch_int_dis)
+_KERNEL_THUMB_FUNC()
+_KERNEL_LABEL(kernel_arch_int_dis)
 
       cpsid    i
       bx       lr
 
 
 
-_TN_THUMB_FUNC()
-_TN_LABEL(tn_arch_int_en)
+_KERNEL_THUMB_FUNC()
+_KERNEL_LABEL(kernel_arch_int_en)
 
       cpsie    i
       bx       lr
 
 
-_TN_THUMB_FUNC()
-_TN_LABEL(tn_arch_sr_save_int_dis)
+_KERNEL_THUMB_FUNC()
+_KERNEL_LABEL(kernel_arch_sr_save_int_dis)
 
       mrs      r0, PRIMASK
       cpsid    i
       bx       lr
 
 
-_TN_THUMB_FUNC()
-_TN_LABEL(tn_arch_sr_restore)
+_KERNEL_THUMB_FUNC()
+_KERNEL_LABEL(kernel_arch_sr_restore)
 
       msr      PRIMASK, r0
       bx       lr
 
 
-_TN_THUMB_FUNC()
-_TN_LABEL(_tn_arch_is_int_disabled)
+_KERNEL_THUMB_FUNC()
+_KERNEL_LABEL(_kernel_arch_is_int_disabled)
 
       mrs      r0, PRIMASK
       bx       lr
 
 
-_TN_THUMB_FUNC()
-_TN_LABEL(_tn_arch_inside_isr)
+_KERNEL_THUMB_FUNC()
+_KERNEL_LABEL(_kernel_arch_inside_isr)
 
       mrs      r0, CONTROL
 
-#if defined(__TN_ARCHFEAT_CORTEX_M_ARMv7M_ISA__)
+#if defined(__KERNEL_ARCHFEAT_CORTEX_M_ARMv7M_ISA__)
       //-- Code for Cortex-M3/M4/M4F
       tst      r0, #0x02   //-- test SPSEL bit (0: MSP, 1: PSP)
       ite      eq
@@ -569,17 +569,17 @@ _TN_LABEL(_tn_arch_inside_isr)
       //-- Code for Cortex-M0/M0+
       movs     r1, #0x02
       tst      r0, r1      //-- test SPSEL bit (0: MSP, 1: PSP)
-      bne      _TN_LOCAL_NAME(__ne)
+      bne      _KERNEL_LOCAL_NAME(__ne)
       movs     r0, #1      //-- SPSEL bit is clear: return true
       bx       lr
-_TN_LOCAL_LABEL(__ne)
+_KERNEL_LOCAL_LABEL(__ne)
       movs     r0, #0      //-- SPSEL bit is set: return false
       bx       lr
 #endif
 
 
-_TN_THUMB_FUNC()
-_TN_LABEL(_tn_arch_context_switch_pend)
+_KERNEL_THUMB_FUNC()
+_KERNEL_LABEL(_kernel_arch_context_switch_pend)
 
       ldr      r1, =ICSR_ADDR
       ldr      r0, =PENDSVSET
@@ -590,19 +590,19 @@ _TN_LABEL(_tn_arch_context_switch_pend)
 
 /*
  * Disable kernel scheduler and return previous state.
- * See comments in `tn_arch.h` for details.
+ * See comments in `kernel_arch.h` for details.
  *
  * On Cortex-M architecture, we can't precisely disable PendSV interrupt,
  * but we should disable interrupts based on their priorities. So,
  * here we disable all interrupts with lowest priority (0xff)
  *
  * @return
- *    Scheduler state to be restored later by `#tn_arch_sched_restore()`.
+ *    Scheduler state to be restored later by `#kernel_arch_sched_restore()`.
  */
-_TN_THUMB_FUNC()
-_TN_LABEL(tn_arch_sched_dis_save)
+_KERNEL_THUMB_FUNC()
+_KERNEL_LABEL(kernel_arch_sched_dis_save)
 
-#if defined(__TN_ARCHFEAT_CORTEX_M_ARMv7M_ISA__)
+#if defined(__KERNEL_ARCHFEAT_CORTEX_M_ARMv7M_ISA__)
       //-- Code for Cortex-M3/M4/M4F
 
       //-- Actual number of interrupt priority levels is
@@ -630,23 +630,23 @@ _TN_LABEL(tn_arch_sched_dis_save)
       //-- Code for Cortex-M0/M0+
       //   Cortex-M0/M0+ don't have BASEPRI register, so, we have to disable
       //   all interrupts
-      b        _TN_NAME(tn_arch_sr_save_int_dis)
+      b        _KERNEL_NAME(kernel_arch_sr_save_int_dis)
 #endif
 
-_TN_THUMB_FUNC()
-_TN_LABEL(tn_arch_sched_restore)
+_KERNEL_THUMB_FUNC()
+_KERNEL_LABEL(kernel_arch_sched_restore)
 
-#if defined(__TN_ARCHFEAT_CORTEX_M_ARMv7M_ISA__)
+#if defined(__KERNEL_ARCHFEAT_CORTEX_M_ARMv7M_ISA__)
       //-- Code for Cortex-M3/M4/M4F
       msr      BASEPRI, r0
       bx       lr
 #else
       //-- Code for Cortex-M0/M0+
       //   Cortex-M0/M0+ don't have BASEPRI register, so, here we just jump
-      //   to tn_arch_sr_restore, which enables all interrupts back
-      b        _TN_NAME(tn_arch_sr_restore)
+      //   to kernel_arch_sr_restore, which enables all interrupts back
+      b        _KERNEL_NAME(kernel_arch_sr_restore)
 #endif
 
 
-   _TN_END()
+   _KERNEL_END()
 

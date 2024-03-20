@@ -1,18 +1,18 @@
 /*******************************************************************************
  *
- * TNeo: real-time kernel initially based on TNKernel
+ * KERNEL: real-time kernel initially based on KERNELKernel
  *
- *    TNKernel:                  copyright 2004, 2013 Yuri Tiomkin.
+ *    KERNELKernel:                  copyright 2004, 2013 Yuri Tiomkin.
  *    PIC32-specific routines:   copyright 2013, 2014 Anders Montonen.
- *    TNeo:                      copyright 2014       Dmitry Frank.
+ *    KERNEL:                      copyright 2014       Dmitry Frank.
  *
- *    TNeo was born as a thorough review and re-implementation of
- *    TNKernel. The new kernel has well-formed code, inherited bugs are fixed
+ *    KERNEL was born as a thorough review and re-implementation of
+ *    KERNELKernel. The new kernel has well-formed code, inherited bugs are fixed
  *    as well as new features being added, and it is tested carefully with
  *    unit-tests.
  *
- *    API is changed somewhat, so it's not 100% compatible with TNKernel,
- *    hence the new name: TNeo.
+ *    API is changed somewhat, so it's not 100% compatible with KERNELKernel,
+ *    hence the new name: KERNEL.
  *
  *    Permission to use, copy, modify, and distribute this software in source
  *    and binary forms and its documentation for any purpose and without fee
@@ -22,7 +22,7 @@
  *
  *    THIS SOFTWARE IS PROVIDED BY THE DMITRY FRANK AND CONTRIBUTORS "AS IS"
  *    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FIKERNELESS FOR A PARTICULAR
  *    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL DMITRY FRANK OR CONTRIBUTORS BE
  *    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  *    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
@@ -34,15 +34,15 @@
  *
  ******************************************************************************/
 
-#ifndef __TN_MUTEX_H
-#define __TN_MUTEX_H
+#ifndef __KERNEL_MUTEX_H
+#define __KERNEL_MUTEX_H
 
 /*******************************************************************************
  *    INCLUDED FILES
  ******************************************************************************/
 
-#include "_tn_sys.h"
-#include "tn_mutex.h"
+#include "_kernel_sys.h"
+#include "kernel_mutex.h"
 
 
 
@@ -70,44 +70,44 @@ extern "C"  {     /*}*/
  *    PROTECTED FUNCTION PROTOTYPES
  ******************************************************************************/
 
-#if TN_USE_MUTEXES
+#if KERNEL_USE_MUTEXES
 /**
  * Unlock all mutexes locked by the task
  */
-void _tn_mutex_unlock_all_by_task(struct TN_Task *task);
+void _kernel_mutex_unlock_all_by_task(struct KERNEL_Task *task);
 
 /**
  * Should be called when task finishes waiting
  * for mutex with priority inheritance.
  *
- * Preconditions: 
+ * Preconditions:
  *
  * - `task->task_queue` is removed from the mutex's wait queue;
  * - `task->pwait_queue` still points to the mutex which task was waiting for;
  * - `mutex->holder` still points to the task which was holding the mutex.
  */
-void _tn_mutex_i_on_task_wait_complete(struct TN_Task *task);
+void _kernel_mutex_i_on_task_wait_complete(struct KERNEL_Task *task);
 
 /**
  * Should be called when task winishes waiting
  * for any mutex (no matter which algorithm it uses)
  */
-void _tn_mutex_on_task_wait_complete(struct TN_Task *task);
+void _kernel_mutex_on_task_wait_complete(struct KERNEL_Task *task);
 
 #else
 
 /*
- * Mutexes are excluded from project: define some stub functions that 
+ * Mutexes are excluded from project: define some stub functions that
  * are just compiled out.
  */
 
-_TN_STATIC_INLINE void _tn_mutex_unlock_all_by_task(struct TN_Task *task) {
+_KERNEL_STATIC_INLINE void _kernel_mutex_unlock_all_by_task(struct KERNEL_Task *task) {
    (void) task;
 }
-_TN_STATIC_INLINE void _tn_mutex_i_on_task_wait_complete(struct TN_Task *task) {
+_KERNEL_STATIC_INLINE void _kernel_mutex_i_on_task_wait_complete(struct KERNEL_Task *task) {
    (void) task;
 }
-_TN_STATIC_INLINE void _tn_mutex_on_task_wait_complete(struct TN_Task *task) {
+_KERNEL_STATIC_INLINE void _kernel_mutex_on_task_wait_complete(struct KERNEL_Task *task) {
    (void) task;
 }
 #endif
@@ -119,14 +119,14 @@ _TN_STATIC_INLINE void _tn_mutex_on_task_wait_complete(struct TN_Task *task) {
  ******************************************************************************/
 
 /**
- * Checks whether given mutex object is valid 
- * (actually, just checks against `id_mutex` field, see `enum #TN_ObjId`)
+ * Checks whether given mutex object is valid
+ * (actually, just checks against `id_mutex` field, see `enum #KERNEL_ObjId`)
  */
-_TN_STATIC_INLINE TN_BOOL _tn_mutex_is_valid(
-      const struct TN_Mutex   *mutex
+_KERNEL_STATIC_INLINE KERNEL_BOOL _kernel_mutex_is_valid(
+      const struct KERNEL_Mutex   *mutex
       )
 {
-   return (mutex->id_mutex == TN_ID_MUTEX);
+   return (mutex->id_mutex == KERNEL_ID_MUTEX);
 }
 
 
@@ -138,7 +138,7 @@ _TN_STATIC_INLINE TN_BOOL _tn_mutex_is_valid(
 #endif
 
 
-#endif // __TN_MUTEX_H
+#endif // __KERNEL_MUTEX_H
 
 
 /*******************************************************************************

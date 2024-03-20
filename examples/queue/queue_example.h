@@ -1,7 +1,7 @@
 /**
  * \file
  *
- * Example project that demonstrates usage of queues in TNeo.
+ * Example project that demonstrates usage of queues in KERNEL.
  */
 
 #ifndef _QUEUE_EXAMPLE_H
@@ -21,7 +21,7 @@
  ******************************************************************************/
 
 /// Application common event group (see `enum E_QueExampleFlag`)
-struct TN_EventGrp;
+struct KERNEL_EventGrp;
 
 
 
@@ -50,28 +50,28 @@ enum E_QueExampleFlag {
  * If you ignore the value returned by any system service, it is almost always
  * a BAD idea: if something goes wrong, the sooner you know it, the better.
  * But, checking error for every system service is a kind of annoying, so,
- * simple macro was invented for that. 
+ * simple macro was invented for that.
  *
- * In most situations, any values other than `#TN_RC_OK` or `#TN_RC_TIMEOUT`
+ * In most situations, any values other than `#KERNEL_RC_OK` or `#KERNEL_RC_TIMEOUT`
  * are not allowed (i.e. should never happen in normal device operation).
  *
- * So, if error value is neither `#TN_RC_OK` nor `#TN_RC_TIMEOUT`, this macro
+ * So, if error value is neither `#KERNEL_RC_OK` nor `#KERNEL_RC_TIMEOUT`, this macro
  * issues a software break.
  *
- * If you need to allow `#TN_RC_OK` only, use `SYSRETVAL_CHECK()` instead (see
+ * If you need to allow `#KERNEL_RC_OK` only, use `SYSRETVAL_CHECK()` instead (see
  * below)
  *
  * Usage is as follows:
  *
  * \code{.c}
- *    enum TN_RCode rc 
- *       = SYSRETVAL_CHECK_TO(tn_queue_send(&my_queue, p_data, MY_TIMEOUT));
+ *    enum KERNEL_RCode rc
+ *       = SYSRETVAL_CHECK_TO(kernel_queue_send(&my_queue, p_data, MY_TIMEOUT));
  *
  *    switch (rc){
- *       case TN_RC_OK:
+ *       case KERNEL_RC_OK:
  *          //-- handle successfull operation
  *          break;
- *       case TN_RC_TIMEOUT:
+ *       case KERNEL_RC_TIMEOUT:
  *          //-- handle timeout
  *          break;
  *       default:
@@ -79,12 +79,12 @@ enum E_QueExampleFlag {
  *          break;
  *    }
  * \endcode
- * 
+ *
  */
 #define SYSRETVAL_CHECK_TO(x)                                     \
    ({                                                             \
       int __rv = (x);                                             \
-      if (__rv != TN_RC_OK && __rv != TN_RC_TIMEOUT){             \
+      if (__rv != KERNEL_RC_OK && __rv != KERNEL_RC_TIMEOUT){             \
          SOFTWARE_BREAK();                                        \
       }                                                           \
       /* like, return __rv */                                     \
@@ -92,18 +92,18 @@ enum E_QueExampleFlag {
     })
 
 /**
- * The same as `SYSRETVAL_CHECK_TO()`, but it allows `#TN_RC_OK` only.
+ * The same as `SYSRETVAL_CHECK_TO()`, but it allows `#KERNEL_RC_OK` only.
  *
  * Since there is only one return code allowed, usage is simple:
  *
  * \code{.c}
- *    SYSRETVAL_CHECK(tn_queue_send(&my_queue, p_data, MY_TIMEOUT));
+ *    SYSRETVAL_CHECK(kernel_queue_send(&my_queue, p_data, MY_TIMEOUT));
  * \endcode
  */
 #define SYSRETVAL_CHECK(x)                                        \
    ({                                                             \
       int __rv = (x);                                             \
-      if (__rv != TN_RC_OK){                                      \
+      if (__rv != KERNEL_RC_OK){                                      \
          SOFTWARE_BREAK();                                        \
       }                                                           \
       /* like, return __rv */                                     \
@@ -122,7 +122,7 @@ enum E_QueExampleFlag {
 void init_task_create(void);
 
 /**
- * Initialization of application common objects, must be called once 
+ * Initialization of application common objects, must be called once
  * from the initial application task (which is created in init_task_create())
  */
 void queue_example_init(void);
@@ -134,7 +134,7 @@ void queue_example_init(void);
  * Do note that you must call `queue_example_init()` before
  * you can get eventgrp.
  */
-struct TN_EventGrp *queue_example_eventgrp_get(void);
+struct KERNEL_EventGrp *queue_example_eventgrp_get(void);
 
 
 

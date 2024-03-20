@@ -1,7 +1,7 @@
 /**
  * \file
  *
- * Example project that demonstrates usage of queues in TNeo.
+ * Example project that demonstrates usage of queues in KERNEL.
  */
 
 
@@ -60,7 +60,7 @@ void task_consumer_create(void);
  * @param pin_num
  *    pin number to toggle.
  *
- * @return 
+ * @return
  *    - 1 on success
  *    - 0 on failure
  */

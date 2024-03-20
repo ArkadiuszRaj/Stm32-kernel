@@ -1,18 +1,18 @@
 /*******************************************************************************
  *
- * TNeo: real-time kernel initially based on TNKernel
+ * KERNEL: real-time kernel initially based on KERNELKernel
  *
- *    TNKernel:                  copyright 2004, 2013 Yuri Tiomkin.
+ *    KERNELKernel:                  copyright 2004, 2013 Yuri Tiomkin.
  *    PIC32-specific routines:   copyright 2013, 2014 Anders Montonen.
- *    TNeo:                      copyright 2014       Dmitry Frank.
+ *    KERNEL:                      copyright 2014       Dmitry Frank.
  *
- *    TNeo was born as a thorough review and re-implementation of
- *    TNKernel. The new kernel has well-formed code, inherited bugs are fixed
+ *    KERNEL was born as a thorough review and re-implementation of
+ *    KERNELKernel. The new kernel has well-formed code, inherited bugs are fixed
  *    as well as new features being added, and it is tested carefully with
  *    unit-tests.
  *
- *    API is changed somewhat, so it's not 100% compatible with TNKernel,
- *    hence the new name: TNeo.
+ *    API is changed somewhat, so it's not 100% compatible with KERNELKernel,
+ *    hence the new name: KERNEL.
  *
  *    Permission to use, copy, modify, and distribute this software in source
  *    and binary forms and its documentation for any purpose and without fee
@@ -22,7 +22,7 @@
  *
  *    THIS SOFTWARE IS PROVIDED BY THE DMITRY FRANK AND CONTRIBUTORS "AS IS"
  *    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FIKERNELESS FOR A PARTICULAR
  *    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL DMITRY FRANK OR CONTRIBUTORS BE
  *    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  *    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
@@ -36,14 +36,14 @@
 
 /**
  * \file
- * 
+ *
  * Macros that may be useful for any part of the kernel.
  * Note: only preprocessor macros allowed here, so that the file can be
  * included in any source file (C, assembler, or whatever)
  */
 
-#ifndef _TN_COMMON_MACROS_H
-#define _TN_COMMON_MACROS_H
+#ifndef _KERNEL_COMMON_MACROS_H
+#define _KERNEL_COMMON_MACROS_H
 
 
 /*******************************************************************************
@@ -53,10 +53,10 @@
 
 /**
  * Macro that expands to string representation of its argument:
- * for example, 
+ * for example,
  *
  * \code{.c}
- *    _TN_STRINGIFY_LITERAL(5)
+ *    _KERNEL_STRINGIFY_LITERAL(5)
  * \endcode
  *
  * expands to:
@@ -65,18 +65,18 @@
  *    "5"
  * \endcode
  *
- * See also _TN_STRINGIFY_MACRO()
+ * See also _KERNEL_STRINGIFY_MACRO()
  */
-#define _TN_STRINGIFY_LITERAL(x)    #x
+#define _KERNEL_STRINGIFY_LITERAL(x)    #x
 
 /**
  * Macro that expands to string representation of its argument, which is
  * allowed to be a macro:
- * for example, 
+ * for example,
  *
  * \code{.c}
  *    #define MY_VALUE     10
- *    _TN_STRINGIFY_MACRO(MY_VALUE)
+ *    _KERNEL_STRINGIFY_MACRO(MY_VALUE)
  * \endcode
  *
  * expands to:
@@ -85,12 +85,12 @@
  *    "10"
  * \endcode
  */
-#define _TN_STRINGIFY_MACRO(x)      _TN_STRINGIFY_LITERAL(x)
+#define _KERNEL_STRINGIFY_MACRO(x)      _KERNEL_STRINGIFY_LITERAL(x)
 
 
 
 
-#endif // _TN_COMMON_MACROS_H
+#endif // _KERNEL_COMMON_MACROS_H
 
 /*******************************************************************************
  *    end of file

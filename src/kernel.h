@@ -1,18 +1,18 @@
 /*******************************************************************************
  *
- * TNeo: real-time kernel initially based on TNKernel
+ * KERNEL: real-time kernel initially based on KERNELKernel
  *
- *    TNKernel:                  copyright 2004, 2013 Yuri Tiomkin.
+ *    KERNELKernel:                  copyright 2004, 2013 Yuri Tiomkin.
  *    PIC32-specific routines:   copyright 2013, 2014 Anders Montonen.
- *    TNeo:                      copyright 2014       Dmitry Frank.
+ *    KERNEL:                      copyright 2014       Dmitry Frank.
  *
- *    TNeo was born as a thorough review and re-implementation of
- *    TNKernel. The new kernel has well-formed code, inherited bugs are fixed
+ *    KERNEL was born as a thorough review and re-implementation of
+ *    KERNELKernel. The new kernel has well-formed code, inherited bugs are fixed
  *    as well as new features being added, and it is tested carefully with
  *    unit-tests.
  *
- *    API is changed somewhat, so it's not 100% compatible with TNKernel,
- *    hence the new name: TNeo.
+ *    API is changed somewhat, so it's not 100% compatible with KERNELKernel,
+ *    hence the new name: KERNEL.
  *
  *    Permission to use, copy, modify, and distribute this software in source
  *    and binary forms and its documentation for any purpose and without fee
@@ -22,7 +22,7 @@
  *
  *    THIS SOFTWARE IS PROVIDED BY THE DMITRY FRANK AND CONTRIBUTORS "AS IS"
  *    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FIKERNELESS FOR A PARTICULAR
  *    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL DMITRY FRANK OR CONTRIBUTORS BE
  *    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  *    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
@@ -41,26 +41,26 @@
  * it merely includes subsystem-specific kernel headers.
  */
 
-#ifndef _TN_H
-#define _TN_H
+#ifndef _KERNEL_H
+#define _KERNEL_H
 
 /*******************************************************************************
  *    INCLUDED FILES
  ******************************************************************************/
 
-#include "core/tn_sys.h"
-#include "core/tn_common.h"
-#include "core/tn_dqueue.h"
-#include "core/tn_eventgrp.h"
-#include "core/tn_fmem.h"
-#include "core/tn_mutex.h"
-#include "core/tn_sem.h"
-#include "core/tn_tasks.h"
-#include "core/tn_timer.h"
+#include "core/kernel_sys.h"
+#include "core/kernel_common.h"
+#include "core/kernel_dqueue.h"
+#include "core/kernel_eventgrp.h"
+#include "core/kernel_fmem.h"
+#include "core/kernel_mutex.h"
+#include "core/kernel_sem.h"
+#include "core/kernel_tasks.h"
+#include "core/kernel_timer.h"
 
 
 //-- include old symbols for compatibility with old projects
-#include "core/tn_oldsymbols.h"
+#include "core/kernel_oldsymbols.h"
 
 
 /*******************************************************************************
@@ -80,7 +80,7 @@
  ******************************************************************************/
 
 
-#endif // _TN_H
+#endif // _KERNEL_H
 
 
 /*******************************************************************************

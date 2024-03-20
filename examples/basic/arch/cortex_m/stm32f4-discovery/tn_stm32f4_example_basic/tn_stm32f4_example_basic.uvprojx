@@ -47,7 +47,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\Objects\</OutputDirectory>
-          <OutputName>tn_stm32f4_example_basic</OutputName>
+          <OutputName>kernel_stm32f4_example_basic</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>0</CreateHexFile>
@@ -409,14 +409,14 @@
           <GroupName>src</GroupName>
           <Files>
             <File>
-              <FileName>tn_stm32f4_example_basic.c</FileName>
+              <FileName>kernel_stm32f4_example_basic.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\tn_stm32f4_example_basic.c</FilePath>
+              <FilePath>..\kernel_stm32f4_example_basic.c</FilePath>
             </File>
             <File>
-              <FileName>tn_app_check.c</FileName>
+              <FileName>kernel_app_check.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\..\src\tn_app_check.c</FilePath>
+              <FilePath>..\..\..\..\..\..\src\kernel_app_check.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -424,9 +424,9 @@
           <GroupName>lib</GroupName>
           <Files>
             <File>
-              <FileName>tneo_cortex_m4f_keil_rv.lib</FileName>
+              <FileName>kernel_cortex_m4f_keil_rv.lib</FileName>
               <FileType>4</FileType>
-              <FilePath>..\tneo_cortex_m4f_keil_rv.lib</FilePath>
+              <FilePath>..\kernel_cortex_m4f_keil_rv.lib</FilePath>
             </File>
           </Files>
         </Group>
