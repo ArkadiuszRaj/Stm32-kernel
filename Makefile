@@ -9,26 +9,11 @@
 #     cortex_m4
 #     cortex_m4f
 #
-#     pic32mx
-#
-#     pic24_dspic_noeds
-#     pic24_dspic_eds
-#
 #  KERNEL_COMPILER: depends on KERNEL_ARCH.
 #     For cortex-m series, the following values are valid:
 #
 #        arm-none-eabi-gcc
 #        clang
-#
-#     For pic32mx, just one value is valid:
-#
-#        xc32
-#
-#     For pic24/dspic, just one value is valid:
-#
-#        xc16
-#
-#
 #
 #  Example invocation:
 #
@@ -36,8 +21,6 @@
 #
 
 CFLAGS_COMMON = -Wall -Wunused-parameter -Werror -ffunction-sections -fdata-sections -g3 -Os
-
-
 
 
 #---------------------------------------------------------------------------
@@ -68,104 +51,21 @@ ifeq ($(KERNEL_ARCH), $(filter $(KERNEL_ARCH), cortex_m0 cortex_m0plus cortex_m1
          CORTEX_M_FLAGS = -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
       endif
 
-      ifeq ($(KERNEL_COMPILER), arm-none-eabi-gcc)
-         CC = arm-none-eabi-gcc
-         AR = arm-none-eabi-ar
-         CFLAGS = $(CORTEX_M_FLAGS) $(CFLAGS_COMMON) -mthumb -fsigned-char -pedantic
-         ASFLAGS = $(CFLAGS) -x assembler-with-cpp
-         KERNEL_COMPILER_VERSION_CMD := $(CC) --version
+     CC = arm-none-eabi-gcc
+     AR = arm-none-eabi-ar
+     CFLAGS = $(CORTEX_M_FLAGS) $(CFLAGS_COMMON) -mthumb -fsigned-char -pedantic
+     ASFLAGS = $(CFLAGS) -x assembler-with-cpp
+     KERNEL_COMPILER_VERSION_CMD := $(CC) --version
 
-         BINARY_CMD = $(AR) -r $(BINARY) $(OBJS)
-      endif
-
-      ifeq ($(KERNEL_COMPILER), clang)
-         CC = clang
-         AR = ar  #TODO: probably use clang archiver?
-         CFLAGS = $(CORTEX_M_FLAGS) $(CFLAGS_COMMON) -target arm-none-eabi -mthumb -fsigned-char -pedantic
-         ASFLAGS = $(CFLAGS) -x assembler-with-cpp
-         KERNEL_COMPILER_VERSION_CMD := $(CC) --version
-
-         BINARY_CMD = $(AR) -r $(BINARY) $(OBJS)
-      endif
-   endif
-
-endif
-
-
-
-
-#---------------------------------------------------------------------------
-# PIC32 series
-#---------------------------------------------------------------------------
-
-ifeq ($(KERNEL_ARCH), $(filter $(KERNEL_ARCH), pic32mx))
-   KERNEL_ARCH_DIR = pic32
-
-   ifeq ($(KERNEL_COMPILER), $(filter $(KERNEL_COMPILER), xc32))
-
-      ifeq ($(KERNEL_ARCH), pic32mx)
-         PIC32MX_FLAGS = -mprocessor=32MX440F512H
-      endif
-
-      ifeq ($(KERNEL_COMPILER), xc32)
-         CC = xc32-gcc
-         AR = xc32-ar
-         CFLAGS = $(PIC32MX_FLAGS) $(CFLAGS_COMMON) -g -x c -std=c99
-         ASFLAGS = $(PIC32MX_FLAGS)
-         KERNEL_COMPILER_VERSION_CMD := $(CC) --version
-
-         BINARY_CMD = $(AR) -r $(BINARY) $(OBJS)
-      endif
-
+     BINARY_CMD = $(AR) -r $(BINARY) $(OBJS)
    endif
 endif
-
-
-
-#---------------------------------------------------------------------------
-# PIC24/dsPIC series
-#---------------------------------------------------------------------------
-
-ifeq ($(KERNEL_ARCH), $(filter $(KERNEL_ARCH), pic24_dspic_noeds pic24_dspic_eds))
-   KERNEL_ARCH_DIR = pic24_dspic
-
-   ifeq ($(KERNEL_COMPILER), $(filter $(KERNEL_COMPILER), xc16))
-
-      ifeq ($(KERNEL_ARCH), pic24_dspic_noeds)
-         PIC24_DSPIC_FLAGS = -mcpu=24FJ256GB106
-      endif
-      ifeq ($(KERNEL_ARCH), pic24_dspic_eds)
-         PIC24_DSPIC_FLAGS = -mcpu=24FJ256GB206
-      endif
-
-      ifeq ($(KERNEL_COMPILER), xc16)
-         CC = xc16-gcc
-         AR = xc16-ar
-         CFLAGS = $(PIC24_DSPIC_FLAGS) $(CFLAGS_COMMON) -mlarge-code \
-                  -mlarge-data -mconst-in-code -msmart-io=1 -msfr-warn=off \
-                  -omf=elf -std=c99
-         ASFLAGS = $(CFLAGS)
-         KERNEL_COMPILER_VERSION_CMD := $(CC) --version
-
-         BINARY_CMD = $(AR) -r $(BINARY) $(OBJS)
-      endif
-
-   endif
-endif
-
-ERR_MSG_STD = See comments in the Makefile-single for usage notes
-
-
 
 
 # check if KERNEL_ARCH and KERNEL_COMPILER values were recognized
 
 ifeq ($(KERNEL_ARCH),)
    $(error KERNEL_ARCH is undefined. $(ERR_MSG_STD))
-endif
-
-ifeq ($(KERNEL_COMPILER),)
-   $(error KERNEL_COMPILER is undefined. $(ERR_MSG_STD))
 endif
 
 ifndef KERNEL_ARCH_DIR
